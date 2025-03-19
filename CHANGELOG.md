@@ -1,5 +1,5 @@
 # 1.39.0+41
-
+ 
 ### [Refactor]
 - Optimize navigation of dashboard route and welcome [#122](https://github.com/pactus-project/pactus-gui/pull/129)
 
