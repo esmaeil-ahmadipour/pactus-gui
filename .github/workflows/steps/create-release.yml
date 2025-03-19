@@ -1,0 +1,15 @@
+name: Create Release
+
+runs-on: ubuntu-latest
+
+needs: build-outputs
+
+steps:
+  - name: Create release
+    uses: actions/create-release@v1
+    with:
+      tag_name: ${{ needs.extract-version-changelog.outputs.version }}
+      release_name: Release ${{ needs.extract-version-changelog.outputs.version }}
+      body: ${{ needs.extract-version-changelog.outputs.changelog }}
+      draft: false
+      prerelease: false
