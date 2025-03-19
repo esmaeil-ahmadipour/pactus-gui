@@ -10,24 +10,24 @@ on:
 jobs:
   detect-release-commit:
     if: github.event.pull_request.merged == true
-    uses: ./.github/workflows/steps/detect-release-commit.yml
+    uses: ./.github/workflows/step-detect-release-commit.yml
 
   extract-version-changelog:
     needs: detect-release-commit
-    uses: ./.github/workflows/steps/extract-version-changelog.yml
+    uses: ./.github/workflows/step-extract-version-changelog.yml
 
   create-tag:
     needs: extract-version-changelog
-    uses: ./.github/workflows/steps/create-tag.yml
+    uses: ./.github/workflows/step-create-tag.yml
 
   build-outputs:
     needs: create-tag
-    uses: ./.github/workflows/steps/build-outputs.yml
+    uses: ./.github/workflows/step-build-outputs.yml
 
   create-release:
     needs: build-outputs
-    uses: ./.github/workflows/steps/create-release.yml
+    uses: ./.github/workflows/step-create-release.yml
 
   notify:
     needs: create-release
-    uses: ./.github/workflows/steps/notify.yml
+    uses: ./.github/workflows/step-notify.yml
