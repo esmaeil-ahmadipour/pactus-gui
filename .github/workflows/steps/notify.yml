@@ -1,0 +1,13 @@
+name: Notify
+
+runs-on: ubuntu-latest
+
+needs: create-release
+
+steps:
+  - name: Send Slack notification
+    uses: slackapi/slack-github-action@v1
+    with:
+      slack-message: "New release created: ${{ needs.extract-version-changelog.outputs.version }}\nChangelog: ${{ needs.extract-version-changelog.outputs.changelog }}\nRelease URL: ${{ needs.create-release.outputs.html_url }}"
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

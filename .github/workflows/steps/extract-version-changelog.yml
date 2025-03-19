@@ -1,0 +1,22 @@
+name: Extract Version and Changelog
+
+runs-on: ubuntu-latest
+
+needs: detect-release-commit
+
+outputs:
+  version: ${{ steps.extract-version.outputs.version }}
+  changelog: ${{ steps.extract-changelog.outputs.changelog }}
+
+steps:
+  - name: Extract version
+    id: extract-version
+    run: |
+      VERSION=$(echo "${{ github.event.pull_request.merge_commit_message }}" | grep -oP '(?<=release: create release for )v[0-9]+\.[0-9]+\.[0-9]+')
+      echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  - name: Extract changelog
+    id: extract-changelog
+    run: |
+      CHANGELOG=$(echo "${{ github.event.pull_request.merge_commit_message }}" | sed -n '/release: create release for/{:a;N;/---/!ba;s/.*\n\n//p}')
+      echo "changelog=$CHANGELOG" >> $GITHUB_OUTPUT
