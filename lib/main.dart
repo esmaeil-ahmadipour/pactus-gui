@@ -50,7 +50,7 @@ Future<void> main() async {
   );
 }
 
-class PactusGuiApp extends StatelessWidget {
+class PactusGuiApp extends StatelessWidget {//
   const PactusGuiApp({super.key});
 
   @override
