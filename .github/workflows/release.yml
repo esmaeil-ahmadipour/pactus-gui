@@ -20,7 +20,7 @@ jobs:
       - name: Check merge commit message
         id: check-commit
         run: |
-          if [[ "${{ github.event.pull_request.merge_commit.message }}" == release:\ create\ release\ for* ]]; then
+          if [[ "${{ github.event.pull_request.merge_commit.message }}" == release:*]]; then
             echo "is_release_commit=true" >> $GITHUB_ENV
             echo "is_release_commit=true" >> $GITHUB_OUTPUT
           else
