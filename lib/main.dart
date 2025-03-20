@@ -50,9 +50,6 @@ Future<void> main() async {
   );
 }
 
-
-
-
 class PactusGuiApp extends StatelessWidget {
   const PactusGuiApp({super.key});
 
