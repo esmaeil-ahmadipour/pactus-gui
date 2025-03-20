@@ -1,0 +1,81 @@
+name: Release Pipeline
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+
+jobs:
+  detect-release:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    outputs:
+      is_release_commit: ${{ steps.check-commit.outputs.is_release_commit }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check merge commit message
+        id: check-commit
+        run: |
+          if [[ "${{ github.event.pull_request.merge_commit.message }}" == release:\ create\ release\ for* ]]; then
+            echo "is_release_commit=true" >> $GITHUB_ENV
+          else
+            echo "is_release_commit=false" >> $GITHUB_ENV
+          fi
+
+  extract-version:
+    needs: detect-release
+    if: needs.detect-release.outputs.is_release_commit == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      changelog: ${{ steps.extract-changelog.outputs.changelog }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Extract version
+        id: extract-version
+        run: echo "VERSION=1.0.0" >> $GITHUB_ENV  # باید نسخه رو از فایل یا متد استخراج کنید.
+
+      - name: Extract changelog
+        id: extract-changelog
+        run: echo "CHANGELOG=New Features Added" >> $GITHUB_ENV
+
+  create-tag:
+    needs: extract-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Create tag
+        run: |
+          git tag -a "${{ needs.extract-version.outputs.version }}" -m "${{ needs.extract-version.outputs.changelog }}"
+          git push origin "${{ needs.extract-version.outputs.version }}"
+
+  build-outputs:
+    needs: create-tag
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Build for Linux
+        run: flutter build linux --release
+
+  create-release:
+    needs: build-outputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ needs.extract-version.outputs.version }}
+          release_name: Release ${{ needs.extract-version.outputs.version }}
+          body: ${{ needs.extract-version.outputs.changelog }}
+          draft: false
+          prerelease: false
