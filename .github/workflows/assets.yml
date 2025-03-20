@@ -15,17 +15,7 @@ jobs:
           flutter-version: '3.27.3'
       - name: Install dependencies
         run: flutter pub get
-      - name: Generate Assets Files
-        run: |
-          # Command to rebuild asset files
-          dart run build_runner build --delete-conflicting-outputs --build-filter="lib/src/core/utils/gen/assets\*.dart" || (
-            echo "Error: Failed to generate asset files.";
-            exit 1;
-          )
-      - name: Check Asset Files Changes
-        run: |
-          # Check if there are changes after generating asset files
-          git diff --exit-code lib/src/core/utils/gen/assets || (
-            echo "Error: Asset files are outdated. Run the generation command and commit the changes.";
-            exit 1;
-          )
+      - name: Generate Asset Files
+        uses: ./.github/actions/generate-assets
+      - name: Validate Asset Files
+        uses: ./.github/actions/validate-assets
