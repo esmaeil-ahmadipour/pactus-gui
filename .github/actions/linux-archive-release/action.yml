@@ -1,0 +1,11 @@
+name: 'Linux Archive Release'
+description: 'Linux Archive Release'
+runs:
+  using: 'composite'
+  steps:
+    - name: Linux Archive Release
+      shell: bash
+      run: |
+        cp -r $GITHUB_WORKSPACE/lib/src/core/native_resources/linux/* build/linux/x64/release/bundle/
+        cd build/linux/x64/release/bundle
+        zip -r linux-build.zip ./*
