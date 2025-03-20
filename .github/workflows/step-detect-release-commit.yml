@@ -13,13 +13,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Check merge commit message
         id: check-commit
         run: |
           if [[ "${{ github.event.pull_request.merge_commit.message }}" == release:\ create\ release\ for* ]]; then
-            echo "::set-output name=is_release_commit::true"
+            echo "is_release_commit=true" >> $GITHUB_OUTPUT
           else
-            echo "::set-output name=is_release_commit::false"
+            echo "is_release_commit=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Trigger next workflow
@@ -28,3 +31,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           event-type: release-detected
+          client-payload: '{"pull_request": {"merge_commit": {"message": "${{ github.event.pull_request.merge_commit.message }}"}}}'
