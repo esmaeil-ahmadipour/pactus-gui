@@ -1,19 +1,30 @@
 name: Detect Release Commit
 
-runs-on: ubuntu-latest
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
 
-outputs:
-  is_release_commit: ${{ steps.check-commit.outputs.is_release_commit }}
+jobs:
+  detect-release-commit:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
 
-steps:
-  - name: Checkout repository
-    uses: actions/checkout@v3
+    steps:
+      - name: Check merge commit message
+        id: check-commit
+        run: |
+          if [[ "${{ github.event.pull_request.merge_commit.message }}" == release:\ create\ release\ for* ]]; then
+            echo "::set-output name=is_release_commit::true"
+          else
+            echo "::set-output name=is_release_commit::false"
+          fi
 
-  - name: Check merge commit message
-    id: check-commit
-    run: |
-      if [[ "${{ github.event.pull_request.merge_commit_message }}" == release:\ create\ release\ for* ]]; then
-        echo "is_release_commit=true" >> $GITHUB_OUTPUT
-      else
-        echo "is_release_commit=false" >> $GITHUB_OUTPUT
-      fi
+      - name: Trigger next workflow
+        if: steps.check-commit.outputs.is_release_commit == 'true'
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: release-detected
