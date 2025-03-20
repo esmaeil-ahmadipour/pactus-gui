@@ -15,5 +15,9 @@ jobs:
           flutter-version: '3.27.3'
       - name: Install dependencies
         run: flutter pub get
+      - name: Generate Localization Files
+        uses: ./.github/actions/generate-localization
+      - name: Validate Localization Files
+        uses: ./.github/actions/validate-localization
       - name: Run Flutter Analyze
         run: flutter analyze
