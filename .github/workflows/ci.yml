@@ -40,7 +40,7 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
-      release_tag: linux-release-number-${{ github.run_number }} # create tag/release
+#      release_tag: linux-release-number-${{ github.run_number }} # create tag/release
       platform: Linux
     steps:
       - name: Checkout code
