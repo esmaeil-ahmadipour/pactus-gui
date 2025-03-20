@@ -1,10 +1,10 @@
-name: Localization
+name: Localization Validation
 on:
   pull_request:
     branches:
       - main
 jobs:
-  lint_and_test:
+  localization_validation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
