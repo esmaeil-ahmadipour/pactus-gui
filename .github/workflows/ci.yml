@@ -85,47 +85,6 @@ jobs:
           tag_name: linux-release-${{ github.run_number }}
           files: build/linux/x64/release/bundle/linux-build.zip
 
-  notify-linux:
-    needs: build-and-release-linux
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Telegram Notification
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          format: markdown
-          message: |
-            🚀 *Linux Release Published!*
-            
-            📦 Version: Linux Release ${{ github.run_number }}
-            🔄 PR: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-            👤 Requested by: ${{ github.event.pull_request.user.login }}
-            ✅ Merged by: ${{ github.event.pull_request.merged_by.login }}
-            
-            📥 *Download Link:*
-            [Linux Build](https://github.com/${{ github.repository }}/releases/download/linux-release-${{ github.run_number }}/linux-build.zip)
-            
-            🔍 [View Release](https://github.com/${{ github.repository }}/releases/tag/linux-release-${{ github.run_number }})
-
-      - name: Send Discord Notification
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: |
-            🚀 **Linux Release Published!**
-            
-            📦 Version: Linux Release ${{ github.run_number }}
-            🔄 PR: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-            👤 Requested by: ${{ github.event.pull_request.user.login }}
-            ✅ Merged by: ${{ github.event.pull_request.merged_by.login }}
-            
-            📥 *Download Link:*
-            [Linux Build](https://github.com/${{ github.repository }}/releases/download/linux-release-${{ github.run_number }}/linux-build.zip)
-            
-            🔍 [View Release](https://github.com/${{ github.repository }}/releases/tag/linux-release-${{ github.run_number }})
-
   build-and-release-windows:
     if: github.event.pull_request.merged == true
     runs-on: windows-latest
@@ -203,47 +162,6 @@ jobs:
           tag_name: windows-${{ matrix.arch }}-release-${{ github.run_number }}
           files: build/windows/x64/runner/Release/windows-${{ matrix.arch }}-build.zip
 
-  notify-windows:
-    needs: build-and-release-windows
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Telegram Notification
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          format: markdown
-          message: |
-            🚀 *Windows Release Published!*
-            
-            📦 Version: Windows Release ${{ github.run_number }}
-            🔄 PR: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-            👤 Requested by: ${{ github.event.pull_request.user.login }}
-            ✅ Merged by: ${{ github.event.pull_request.merged_by.login }}
-            
-            📥 *Download Link:*
-            [Windows Build](https://github.com/${{ github.repository }}/releases/download/windows-${{ matrix.arch }}-release-${{ github.run_number }}/windows-${{ matrix.arch }}-build.zip)
-            
-            🔍 [View Release](https://github.com/${{ github.repository }}/releases/tag/windows-${{ matrix.arch }}-release-${{ github.run_number }})
-
-      - name: Send Discord Notification
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: |
-            🚀 **Windows Release Published!**
-            
-                    📦 Version: Windows Release ${{ github.run_number }}
-            🔄 PR: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-            👤 Requested by: ${{ github.event.pull_request.user.login }}
-            ✅ Merged by: ${{ github.event.pull_request.merged_by.login }}
-            
-            📥 *Download Link:*
-            [Windows Build](https://github.com/${{ github.repository }}/releases/download/windows-${{ matrix.arch }}-release-${{ github.run_number }}/windows-${{ matrix.arch }}-build.zip)
-            
-            🔍 [View Release](https://github.com/${{ github.repository }}/releases/tag/windows-${{ matrix.arch }}-release-${{ github.run_number }})
-
   build-and-release-macos:
     if: github.event.pull_request.merged == true
     runs-on: macos-latest
@@ -319,43 +237,3 @@ jobs:
           tag_name: macos-${{ matrix.arch }}-release-${{ github.run_number }}
           files: build/macos/Build/Products/Release/macos-${{ matrix.arch }}-build.zip
 
-  notify-macos:
-    needs: build-and-release-macos
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send Telegram Notification
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          format: markdown
-          message: |
-            🚀 *macOS Release Published!*
-            
-            📦 Version: macOS Release ${{ github.run_number }}
-            🔄 PR: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-            👤 Requested by: ${{ github.event.pull_request.user.login }}
-            ✅ Merged by: ${{ github.event.pull_request.merged_by.login }}
-            
-            📥 *Download Link:*
-            [macOS Build](https://github.com/${{ github.repository }}/releases/download/macos-${{ matrix.arch }}-release-${{ github.run_number }}/macos-${{ matrix.arch }}-build.zip)
-            
-            🔍 [View Release](https://github.com/${{ github.repository }}/releases/tag/macos-${{ matrix.arch }}-release-${{ github.run_number }})
-
-      - name: Send Discord Notification
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        with:
-          args: |
-            🚀 **macOS Release Published!**
-            
-            📦 Version: macOS Release ${{ github.run_number }}
-            🔄 PR: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-            👤 Requested by: ${{ github.event.pull_request.user.login }}
-            ✅ Merged by: ${{ github.event.pull_request.merged_by.login }}
-            
-            📥 *Download Link:*
-            [macOS Build](https://github.com/${{ github.repository }}/releases/download/macos-${{ matrix.arch }}-release-${{ github.run_number }}/macos-${{ matrix.arch }}-build.zip)
-            
-            🔍 [View Release](https://github.com/${{ github.repository }}/releases/tag/macos-${{ matrix.arch }}-release-${{ github.run_number }})
