@@ -1,10 +1,10 @@
-name: Linting & Tests Validation
+name: Testing Step
 on:
   pull_request:
     branches:
       - main
 jobs:
-  test:
+  testing_step:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
