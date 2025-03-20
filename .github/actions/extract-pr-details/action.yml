@@ -16,8 +16,8 @@ runs:
         # Check if PR title or body starts with "release:"
         if [[ "$PR_TITLE" != release:* && "$PR_BODY" != release:* ]]; then
           echo "Neither PR title nor body starts with 'release:'"
-          echo "Stopping pipeline with success status..."
-          exit 0 # Exit with success status
+          echo "Stopping pipeline with fail status..."
+          exit 1 # Exit with fail status
         else
           echo "PR title or body starts with 'release:'"
           echo "Continuing pipeline..."

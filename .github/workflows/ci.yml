@@ -30,13 +30,14 @@ jobs:
       - name: Extract PR Details
         id: extract-pr
         uses: ./.github/actions/extract-pr-details
+
       - name: Print PR title and body
         run: |
           echo "PR Title: ${{ steps.extract-pr.outputs.pr_title }}"
           echo "PR Body: ${{ steps.extract-pr.outputs.pr_body }}"
 
   build-and-release-linux:
-    if: steps.extract-pr.outcome == 'success'
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     outputs:
       release_tag: linux-release-number-${{ github.run_number }} # create tag/release
@@ -51,6 +52,11 @@ jobs:
           flutter-version: '3.27.3'
           channel: 'stable'
           cache: true
+
+      - name: Extract PR Details
+        id: extract-pr
+        uses: ./.github/actions/extract-pr-details
+
       - name: Install Linux dependencies
         uses: ./.github/actions/linux-install-dependencies
       - name: Enable Linux desktop
