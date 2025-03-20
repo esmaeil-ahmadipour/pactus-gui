@@ -3,105 +3,41 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
-  lint_and_test:
+  setup:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.3'
 
-
-# Install dependencies
       - name: Install dependencies
         run: flutter pub get
 
+  lint_and_test:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-# Detect Dart Formatting Issues
-      - name: Run Dart Format Check (Efficient)
-        run: |
-          dart format . --set-exit-if-changed --output none || (
-            echo "Code formatting issues detected. Run 'dart format .' and commit the changes.";
-            exit 1;
-          )
+      - name: Run Dart Format Check
+        uses: ./.github/actions/dart-format-check
 
-# Generate Localization Files
       - name: Generate Localization Files
-        id: gen_l10n
-        run: |
-          # Run the command to generate localization files and capture the output
-          output=$(flutter gen-l10n)
-          echo "$output"
+        uses: ./.github/actions/generate-localization
 
-          # Check if there are untranslated messages in the output
-          if echo "$output" | grep -q "untranslated message"; then
-            echo "::error file=lib/l10n/l10n.yaml::Error: Untranslated messages detected in your localization files."
-            echo "::error::There are untranslated messages in the following languages:"
-            echo "$output" | grep "untranslated message"
-            echo "::error::Please ensure that all translations are provided in the respective .arb files."
-            exit 1
-          fi
+      - name: Validate Localization Files
+        uses: ./.github/actions/validate-localization
 
-# Detect Localization Files Changes
-      - name: Validate Generated Localization Files
-        run: |
-          # Check if localization files have changes
-          if git diff --exit-code lib/l10n/; then
-            echo "Localization files are up to date."
-          else
-            echo "::error file=lib/l10n/::Error: Localization files are outdated."
-            echo "::error::Please run 'flutter gen-l10n' and commit the changes."
-            exit 1
-          fi
-
-          # Check if translations_utils.dart has changes
-          if git diff --exit-code lib/src/core/utils/gen/localization/translations_utils.dart; then
-            echo "translations_utils.dart is up to date."
-          else
-            echo "::error file=lib/src/core/utils/gen/localization/translations_utils.dart::Error: Changes detected in translations_utils.dart."
-            echo "::error::Please run the necessary custom translation utilities and commit changes."
-            exit 1
-          fi
-
-
-
-# Generate Files Using build_runner
-      - name: Generate Files Using build_runner
-        run: |
-          # Run build_runner to generate files
-          echo "Generating files using build_runner..."
-          dart run build_runner build --delete-conflicting-outputs
-          
-          # Check if the command succeeded
-          if [ $? -ne 0 ]; then
-            echo "::error::Failed to generate files using build_runner."
-            echo "::error::Please check the build_runner output for errors."
-            exit 1
-          else
-            echo "Files generated successfully."
-          fi
-
-
-# Detect Asset File Changes
-      - name: Check Asset Files Changes
-        run: |
-          # Check if there are changes after generating asset files
-          git diff --exit-code lib/src/core/utils/gen/assets || (
-            echo "Error: Asset files are outdated. Run the generation command and commit the changes.";
-            exit 1;
-          )
-          
-          
-
-# Run Flutter Analyze
       - name: Run Flutter Analyze
         run: flutter analyze
 
-
-# Run tests
       - name: Run tests
         run: flutter test
 
@@ -112,5 +48,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Merge Pull Request
-        run: echo "Linting and tests passed successfully.Merge request is ready for merge"
+        run: echo "Linting and tests passed successfully. Merge request is ready for merge"
