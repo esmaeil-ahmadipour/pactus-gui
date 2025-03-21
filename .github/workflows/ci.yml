@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Extract PR Details
-        id: extract-pr
+        id: extract-pr # Step ID in your workflow
         uses: ./.github/actions/extract-pr-details
 
       - name: Print PR title and body
@@ -39,64 +39,79 @@ jobs:
   build-and-release-linux:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    outputs:
-#      release_tag: linux-release-number-${{ github.run_number }} # create tag/release
-      platform: Linux
+    needs: detect-release-commit
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.27.3'
-          channel: 'stable'
-          cache: true
-
-      - name: Extract PR Details
-        id: extract-pr
-        uses: ./.github/actions/extract-pr-details
-
-      - name: Install Linux dependencies
-        uses: ./.github/actions/linux-install-dependencies
-      - name: Enable Linux desktop
-        run: flutter config --enable-linux-desktop
-      - name: Install dependencies
-        run: flutter pub get
-      - name: Generate Localization Files
-        uses: ./.github/actions/generate-localization
-      - name: Generate Asset Files
-        uses: ./.github/actions/generate-assets
-      - name: Run Flutter Analyze
-        run: flutter analyze
-      - name: Fetch and Extract Files
-        uses: ./.github/actions/linux-extract-files
-      - name: Build application
-        run: flutter build linux --release
-      - name: Linux Archive Release
-        uses: ./.github/actions/linux-archive-release
+      - name: Use Outputs Across Jobs
+        run: |
+          echo "Title from detect-release-commit: ${{ needs.detect-release-commit.outputs.pr_title }}"
+          echo "Body from detect-release-commit: ${{ needs.detect-release-commit.outputs.pr_body }}"
 
 
+#    outputs:
+##      release_tag: linux-release-number-${{ github.run_number }} # create tag/release
+#      platform: Linux
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Setup Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.27.3'
+#          channel: 'stable'
+#          cache: true
+#
+#      - name: Extract PR Details
+#        id: extract-pr
+#        uses: ./.github/actions/extract-pr-details
+#
+#      - name: Install Linux dependencies
+#        uses: ./.github/actions/linux-install-dependencies
+#      - name: Enable Linux desktop
+#        run: flutter config --enable-linux-desktop
+#      - name: Install dependencies
+#        run: flutter pub get
+#      - name: Generate Localization Files
+#        uses: ./.github/actions/generate-localization
+#      - name: Generate Asset Files
+#        uses: ./.github/actions/generate-assets
+#      - name: Run Flutter Analyze
+#        run: flutter analyze
+#      - name: Fetch and Extract Files
+#        uses: ./.github/actions/linux-extract-files
+#      - name: Build application
+#        run: flutter build linux --release
+#      - name: Linux Archive Release
+#        uses: ./.github/actions/linux-archive-release
+#
+#
+#
+#      - name: Create Linux Release
+#        id: create_linux_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: linux-release-${{ github.run_number }}
+#          release_name: Linux Release ${{ github.run_number }}
+#          body: |
+#            Linux release from merged PR #${{ github.event.pull_request.number }}
+#            ${{ github.event.pull_request.title }}
+#          draft: false
+#          prerelease: false
+#
+#      - name: Upload Linux Release Asset
+#        uses: softprops/action-gh-release@v1
+#        with:
+#          tag_name: linux-build-release-${{ github.run_number }}
+#          files: build/linux/x64/release/bundle/linux-build.zip
 
-      - name: Create Linux Release
-        id: create_linux_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: linux-release-${{ github.run_number }}
-          release_name: Linux Release ${{ github.run_number }}
-          body: |
-            Linux release from merged PR #${{ github.event.pull_request.number }}
-            ${{ github.event.pull_request.title }}
-          draft: false
-          prerelease: false
 
-      - name: Upload Linux Release Asset
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: linux-build-release-${{ github.run_number }}
-          files: build/linux/x64/release/bundle/linux-build.zip
+
+
+
+
+
 
 
 #  build-and-release-windows:
