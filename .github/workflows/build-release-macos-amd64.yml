@@ -15,6 +15,12 @@ on:
 jobs:
   build-and-release-macos:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [arm64, amd64]
+    outputs:
+      release_tag: macos-${{ matrix.arch }}-release-${{ github.run_number }}
+      platform: macOS
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -65,7 +71,8 @@ jobs:
       - name: macOS Release
         uses: ./.github/actions/macos-release
         with:
-          tag_name: ${{ env.title }}
+          tag_name: ${{ github.ref_name }}
           release_name: "${{ env.title }}"
           release_body: "${{ env.description }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          arch: amd64

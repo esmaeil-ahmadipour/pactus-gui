@@ -4,11 +4,6 @@ runs:
   using: 'composite'
 
   steps:
-    - name: List Build Directory
-      shell: pwsh
-      run: |
-       Get-ChildItem -Recurse -Path build\windows\x64\runner\Release
-
     - name: Archive Windows Build Files
       shell: pwsh
       run: |

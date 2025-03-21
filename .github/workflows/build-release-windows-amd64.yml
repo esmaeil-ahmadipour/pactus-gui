@@ -62,7 +62,7 @@ jobs:
       - name: Windows Release
         uses: ./.github/actions/windows-release
         with:
-          tag_name: ${{ env.tag_name }}
+          tag_name: ${{ github.ref_name }}
           release_name: "${{ env.title }}"
           release_body: "${{ env.description }}"
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the secret as an input
