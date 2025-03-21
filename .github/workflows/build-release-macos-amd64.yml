@@ -14,7 +14,10 @@ on:
 
 jobs:
   build-and-release-macos:
-    runs-on: macos-13-xlarge # Intel-based runner
+    runs-on: macos-latest
+    outputs:
+      release_tag: macos-amd64-release-${{ github.run_number }}
+      platform: macOS
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
