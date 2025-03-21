@@ -36,3 +36,9 @@ runs:
       run: |
         echo "* Running flutter pub get to update l10n dependencies..."
         flutter pub get
+
+    - name: Rearrange Code Styles
+      shell: bash
+      run: |
+        echo "* Running dart format  to re-arrange code styles..."
+        dart format .
