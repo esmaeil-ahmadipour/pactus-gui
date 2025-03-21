@@ -64,9 +64,6 @@ jobs:
       - name: Build application
         run: flutter build linux --release
 
-      - name: Archive Linux Build Files
-        uses: ./.github/actions/linux-archive-build-files
-
       - name: Linux Release
         uses: ./.github/actions/linux-release
         with:
