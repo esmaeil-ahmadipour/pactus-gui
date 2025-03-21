@@ -25,11 +25,7 @@ jobs:
 
       - name: Extract Tag Details
         id: extract_tag
-        run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          echo "tag_name=$TAG_NAME" >> $GITHUB_ENV
-          echo "title=${TAG_NAME}" >> $GITHUB_ENV
-          echo "description=Automated release for $TAG_NAME" >> $GITHUB_ENV
+        uses: ./.github/actions/extract-tag-details
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -68,27 +64,12 @@ jobs:
       - name: Build application
         run: flutter build linux --release
 
-      - name: Linux Archive Release
-        uses: ./.github/actions/linux-archive-release
+      - name: Archive Linux Build Files
+        uses: ./.github/actions/linux-archive-build-files
 
-      - name: Rename Linux Build File
-        run: |
-          mv build/linux/x64/release/bundle/linux-build.zip build/linux/x64/release/bundle/linux-build-${{ env.tag_name }}.zip
-
-      - name: Create Linux Release
-        id: create_linux_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Linux Release
+        uses: ./.github/actions/linux-release
         with:
           tag_name: ${{ env.tag_name }}
           release_name: "${{ env.title }}"
-          body: "${{ env.description }}"
-          draft: false
-          prerelease: false
-
-      - name: Upload Linux Release Asset
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.tag_name }}
-          files: build/linux/x64/release/bundle/linux-build-${{ env.tag_name }}.zip
+          release_body: "${{ env.description }}"

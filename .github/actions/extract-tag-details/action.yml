@@ -1,36 +1,52 @@
 name: 'Extract Tag Details'
-description: 'Extract Tag Details'
+description: 'Extract tag details and create a description.'
 runs:
   using: 'composite'
   steps:
-    - name: Extract Tag Details
+    - name: Extract Tag Name
       id: extract-tag
       shell: bash
       run: |
-        # Extract tag name from GITHUB_REF
         TAG_NAME=${GITHUB_REF#refs/tags/}
-
-        # Extract tag message using git for-each-ref
-        TAG_MESSAGE=$(git for-each-ref --format='%(contents)' refs/tags/${TAG_NAME})
-
-        # Escape newlines and special characters in tag message
-        TAG_MESSAGE_ESCAPED=$(echo "$TAG_MESSAGE" | jq -sRr @uri)
-
-        # Save tag name and message as action outputs
         echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-        echo "tag_message=$TAG_MESSAGE_ESCAPED" >> $GITHUB_OUTPUT
+        echo "title=$TAG_NAME" >> $GITHUB_OUTPUT
 
-        # Check if tag name starts with "v" (optional validation)
-        if [[ "$TAG_NAME" != "v"* ]]; then
-          echo "Tag does not start with 'v'. Stopping pipeline..."
-          exit 1
+    - name: Read Tag Description
+      id: read-tag-description
+      shell: bash
+      run: |
+        if [ -f "tag_message.txt" ]; then
+          TAG_DESCRIPTION=$(cat tag_message.txt)
+        else
+          TAG_DESCRIPTION="No additional details provided."
         fi
+        echo "tag_description=$TAG_DESCRIPTION" >> $GITHUB_OUTPUT
+
+    - name: Create Description
+      id: create-description
+      shell: bash
+      run: |
+        echo "🚀 **Automated Release for ${{ steps.extract-tag.outputs.tag_name }}**" >> description.txt
+        echo "" >> description.txt
+        echo "${{ steps.read-tag-description.outputs.tag_description }}" >> description.txt
+        echo "" >> description.txt
+        echo "### Notes:" >> description.txt
+        echo "- This release includes all updates from the previous version." >> description.txt
+        echo "- Please report any issues on our [GitHub Issues](https://github.com/your-repo/issues) page." >> description.txt
+
+        DESCRIPTION=$(cat description.txt)
+        echo "description=$DESCRIPTION" >> $GITHUB_OUTPUT
+
+        rm description.txt
 
 # Define action outputs
 outputs:
   tag_name:
     description: 'The name of the tag'
     value: ${{ steps.extract-tag.outputs.tag_name }}
-  tag_message:
-    description: 'The message of the tag'
-    value: ${{ steps.extract-tag.outputs.tag_message }}
+  title:
+    description: 'The title of the tag'
+    value: ${{ steps.extract-tag.outputs.title }}
+  tag_description:
+    description: 'The description of the tag'
+    value: ${{ steps.read-tag-description.outputs.tag_description }}
