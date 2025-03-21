@@ -26,7 +26,7 @@ runs:
 
     - name: Create Windows Release
       id: create_windows_release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }} # Use the input instead of secrets.GITHUB_TOKEN
       with:
@@ -37,7 +37,7 @@ runs:
         prerelease: false
 
     - name: Upload Windows Release Asset
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ inputs.tag_name }}
         files: build\windows\x64\runner\Release\windows-build-${{ inputs.tag_name }}.zip
