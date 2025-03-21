@@ -8,8 +8,8 @@ runs:
       shell: bash
       run: |
         TAG_NAME=${GITHUB_REF#refs/tags/}
-        echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-        echo "title=$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+        echo "TITLE=$TAG_NAME" >> $GITHUB_ENV
 
     - name: Read Tag Description
       id: read-tag-description
@@ -20,22 +20,26 @@ runs:
         else
           TAG_DESCRIPTION="No additional details provided."
         fi
-        echo "tag_description=$TAG_DESCRIPTION" >> $GITHUB_OUTPUT
+        echo "TAG_DESCRIPTION<<EOF" >> $GITHUB_ENV
+        echo "$TAG_DESCRIPTION" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
     - name: Create Description
       id: create-description
       shell: bash
       run: |
-        echo "🚀 **Automated Release for ${{ steps.extract-tag.outputs.tag_name }}**" >> description.txt
+        echo "🚀 **Automated Release for $TAG_NAME**" > description.txt
         echo "" >> description.txt
-        echo "${{ steps.read-tag-description.outputs.tag_description }}" >> description.txt
+        echo "$TAG_DESCRIPTION" >> description.txt
         echo "" >> description.txt
         echo "### Notes:" >> description.txt
         echo "- This release includes all updates from the previous version." >> description.txt
         echo "- Please report any issues on our [GitHub Issues](https://github.com/your-repo/issues) page." >> description.txt
 
         DESCRIPTION=$(cat description.txt)
-        echo "description=$DESCRIPTION" >> $GITHUB_OUTPUT
+        echo "DESCRIPTION<<EOF" >> $GITHUB_ENV
+        echo "$DESCRIPTION" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
 
         rm description.txt
 
@@ -43,10 +47,13 @@ runs:
 outputs:
   tag_name:
     description: 'The name of the tag'
-    value: ${{ steps.extract-tag.outputs.tag_name }}
+    value: ${{ env.TAG_NAME }}
   title:
     description: 'The title of the tag'
-    value: ${{ steps.extract-tag.outputs.title }}
+    value: ${{ env.TITLE }}
   tag_description:
     description: 'The description of the tag'
-    value: ${{ steps.read-tag-description.outputs.tag_description }}
+    value: ${{ env.TAG_DESCRIPTION }}
+  description:
+    description: 'Generated release description'
+    value: ${{ env.DESCRIPTION }}
