@@ -15,7 +15,7 @@ runs:
         echo "pr_body=$PR_BODY" >> $GITHUB_OUTPUT
 
         # Check for "release:" prefix
-        if [[ "$PR_TITLE" != release:*]]; then
+        if [[ "$PR_TITLE" != "release:"* ]]; then
           echo "PR not a release. Stopping pipeline..."
           exit 1
         fi
