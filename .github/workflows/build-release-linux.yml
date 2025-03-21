@@ -1,4 +1,4 @@
-name: Desktop Release Build
+name: Linux Release Build
 
 # Add environment variables at the top level
 env:

@@ -11,13 +11,13 @@ runs:
         cd build/macos/Build/Products/Release
 
         # Create a zip archive of all files in the Release directory
-        zip -r macos-build.zip .
+        zip -r macos-build-${{ inputs.arch }}.zip .
 
     - name: Rename macOS Build File
       shell: bash
       run: |
-        # Rename the zip file to include the tag name
-        mv build/macos/Build/Products/Release/macos-build.zip build/macos/Build/Products/Release/macos-build-${{ inputs.tag_name }}.zip
+        # Rename the zip file to include the tag name and architecture
+        mv build/macos/Build/Products/Release/macos-build-${{ inputs.arch }}.zip build/macos/Build/Products/Release/macos-build-${{ inputs.arch }}-${{ inputs.tag_name }}.zip
 
     - name: Create macOS Release
       id: create_macos_release
@@ -35,7 +35,7 @@ runs:
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ inputs.tag_name }}
-        files: build/macos/Build/Products/Release/macos-build-${{ inputs.tag_name }}.zip
+        files: build/macos/Build/Products/Release/macos-build-${{ inputs.arch }}-${{ inputs.tag_name }}.zip
 
 # Define action inputs
 inputs:
@@ -50,4 +50,7 @@ inputs:
     required: true
   github_token:
     description: 'The GitHub token for creating the release'
+    required: true
+  arch:
+    description: 'The CPU architecture (e.g., arm64, amd64)'
     required: true
