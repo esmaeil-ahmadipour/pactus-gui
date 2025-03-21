@@ -4,21 +4,16 @@ runs:
   using: 'composite'
 
   steps:
-    - name: List Build Directory 1
+    - name: List Build Directory
       shell: pwsh
       run: |
-        Get-ChildItem -Recurse -Path build\windows
-
-    - name: List Build Directory 2
-      shell: pwsh
-      run: |
-        Get-ChildItem -Recurse -Path build\windows\x64\Release
+       Get-ChildItem -Recurse -Path build\windows\x64\runner\Release
 
     - name: Archive Windows Build Files
       shell: pwsh
       run: |
         # Navigate to the build directory
-        cd build\windows\x64\Release
+        cd build\windows\x64\runner\Release
 
         # Create a zip archive of all files in the release directory
         Compress-Archive -Path .\* -DestinationPath windows-build.zip
@@ -27,7 +22,7 @@ runs:
       shell: pwsh
       run: |
         # Rename the zip file to include the tag name
-        Rename-Item -Path build\windows\x64\Release\windows-build.zip -NewName "windows-build-${{ inputs.tag_name }}.zip"
+        Rename-Item -Path build\windows\x64\runner\Release\windows-build.zip -NewName "windows-build-${{ inputs.tag_name }}.zip"
 
     - name: Create Windows Release
       id: create_windows_release
@@ -45,7 +40,7 @@ runs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ inputs.tag_name }}
-        files: build\windows\x64\Release\windows-build-${{ inputs.tag_name }}.zip
+        files: build\windows\x64\runner\Release\windows-build-${{ inputs.tag_name }}.zip
 
 # Define action inputs
 inputs:
