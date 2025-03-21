@@ -4,21 +4,27 @@ runs:
   using: 'composite'
   steps:
     - name: Extract PR Details
+      id: extract-step
       shell: bash
       run: |
         PR_TITLE="${{ github.event.pull_request.title }}"
         PR_BODY="${{ github.event.pull_request.body }}"
 
-        # Save PR title and body as output variables
-        echo "pr_title=${PR_TITLE}" >> $GITHUB_OUTPUT
-        echo "pr_body=${PR_BODY}" >> $GITHUB_OUTPUT
+        # Save PR title and body as action outputs
+        echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
+        echo "pr_body=$PR_BODY" >> $GITHUB_OUTPUT
 
-        # Check if PR title or body starts with "release:"
-        if [[ "$PR_TITLE" != release:* && "$PR_BODY" != release:* ]]; then
-          echo "Neither PR title nor body starts with 'release:'"
-          echo "Stopping pipeline with fail status..."
-          exit 1 # Exit with fail status
-        else
-          echo "PR title or body starts with 'release:'"
-          echo "Continuing pipeline..."
+        # Check for "release:" prefix
+        if [[ "$PR_TITLE" != release:*]]; then
+          echo "PR not a release. Stopping pipeline..."
+          exit 1
         fi
+
+# Define action outputs
+outputs:
+  pr_title:
+    description: 'PR title'
+    value: ${{ steps.extract-step.outputs.pr_title }}
+  pr_body:
+    description: 'PR body'
+    value: ${{ steps.extract-step.outputs.pr_body }}
