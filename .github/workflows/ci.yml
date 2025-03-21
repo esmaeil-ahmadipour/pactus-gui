@@ -47,11 +47,15 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate some files by build runner
+        run: dart run build_runner build --delete-conflicting-outputs
+
       - name: Generate Localization Files
         uses: ./.github/actions/generate-localization
 
       - name: Generate Asset Files
         uses: ./.github/actions/generate-assets
+
 
       - name: Run Flutter Analyze
         run: flutter analyze
