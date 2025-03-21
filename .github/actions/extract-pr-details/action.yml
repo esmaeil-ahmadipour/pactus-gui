@@ -10,9 +10,12 @@ runs:
         PR_TITLE="${{ github.event.pull_request.title }}"
         PR_BODY="${{ github.event.pull_request.body }}"
 
+        # Escape newlines in PR_BODY
+        PR_BODY_ESCAPED=$(echo "$PR_BODY" | sed ':a;N;$!ba;s/\n/%0A/g')
+
         # Save PR title and body as action outputs
         echo "pr_title=$PR_TITLE" >> $GITHUB_OUTPUT
-        echo "pr_body=$PR_BODY" >> $GITHUB_OUTPUT
+        echo "pr_body=$PR_BODY_ESCAPED" >> $GITHUB_OUTPUT
 
         # Check for "release:" prefix
         if [[ "$PR_TITLE" != "release:"* ]]; then
