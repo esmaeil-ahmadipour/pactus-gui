@@ -1,0 +1,36 @@
+name: 'Extract Tag Details'
+description: 'Extract Tag Details'
+runs:
+  using: 'composite'
+  steps:
+    - name: Extract Tag Details
+      id: extract-tag
+      shell: bash
+      run: |
+        # Extract tag name from GITHUB_REF
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+
+        # Extract tag message using git for-each-ref
+        TAG_MESSAGE=$(git for-each-ref --format='%(contents)' refs/tags/${TAG_NAME})
+
+        # Escape newlines and special characters in tag message
+        TAG_MESSAGE_ESCAPED=$(echo "$TAG_MESSAGE" | jq -sRr @uri)
+
+        # Save tag name and message as action outputs
+        echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "tag_message=$TAG_MESSAGE_ESCAPED" >> $GITHUB_OUTPUT
+
+        # Check if tag name starts with "v" (optional validation)
+        if [[ "$TAG_NAME" != "v"* ]]; then
+          echo "Tag does not start with 'v'. Stopping pipeline..."
+          exit 1
+        fi
+
+# Define action outputs
+outputs:
+  tag_name:
+    description: 'The name of the tag'
+    value: ${{ steps.extract-tag.outputs.tag_name }}
+  tag_message:
+    description: 'The message of the tag'
+    value: ${{ steps.extract-tag.outputs.tag_message }}
