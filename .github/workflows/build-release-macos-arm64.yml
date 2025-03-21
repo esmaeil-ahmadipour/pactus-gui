@@ -14,13 +14,7 @@ on:
 
 jobs:
   build-and-release-macos:
-    runs-on: macos-latest
-    strategy:
-      matrix:
-        arch: [arm64, amd64]
-    outputs:
-      release_tag: macos-${{ matrix.arch }}-release-${{ github.run_number }}
-      platform: macOS
+    runs-on: macos-13-arm64 # Apple Silicon runner
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
