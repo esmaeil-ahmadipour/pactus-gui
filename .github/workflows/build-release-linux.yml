@@ -49,7 +49,7 @@ jobs:
         id: linux_release
         uses: ./.github/actions/linux-release
         with:
-          tag_name: ${{ env.tag_name }}
+          tag_name: ${{ steps.extract_tag.outputs.tag_name }}
           release_name: "${{ steps.extract_tag.outputs.title }}"
           release_body: "${{ steps.extract_tag.outputs.description }}"
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the secret as an input
@@ -62,7 +62,7 @@ jobs:
           cd build/linux/x64/release/bundle
           
           # Create a zip archive with the correct file name
-          FILE_NAME="linux-build-${{ env.tag_name }}.zip"
+          FILE_NAME="linux-build-${{ steps.extract_tag.outputs.tag_name }}.zip"
           zip -r "${FILE_NAME}" .
           
           # Set the file name as an output
@@ -74,7 +74,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.tag_name }}
+          tag_name: ${{ steps.extract_tag.outputs.tag_name }}
           release_name: "${{ inputs.release_name }}"
           body: "${{ inputs.release_body }}"
           draft: false
@@ -84,14 +84,14 @@ jobs:
         id: upload_linux_release_asset
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.tag_name }}
+          tag_name: ${{ steps.extract_tag.outputs.tag_name }}
           files: build/linux/x64/release/bundle/${{ steps.archive_linux_build.outputs.file_name }}
 
       - name: Prepare Download Links
         id: prepare_download_links
         uses: ./.github/actions/prepare-download-links
         with:
-          tag_name: ${{ env.tag_name }}
+          tag_name: ${{ steps.extract_tag.outputs.tag_name }}
           file_name: ${{ steps.archive_linux_build.outputs.file_name }}
 
 
