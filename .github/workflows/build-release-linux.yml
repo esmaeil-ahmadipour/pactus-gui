@@ -31,7 +31,7 @@ jobs:
           cache: true
 
       - name: Install Flutter dependencies
-        uses: ./.github/actions/prepare-release
+        uses: ./.github/actions/preparing-release
 
       - name: Install Linux dependencies
         uses: ./.github/actions/linux-install-dependencies
