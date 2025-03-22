@@ -69,10 +69,18 @@ jobs:
           release_body: "${{ steps.extract_tag.outputs.description }}"
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the secret as an input
 
+
+      - name: Prepare Download Links
+        id: prepare_download_links
+        uses: ./.github/actions/prepare-links-action
+        with:
+          tag_name: ${{ inputs.tag_name }}
+          file_name: ${{ steps.release_action.outputs.file_name }}
+
       - name: Send Discord Notification
         uses: ./.github/actions/notification-to-discord
         with:
           os: Linux
-          download_link: "https://github.com/${{ github.repository }}/releases/download/${{ steps.linux_release.outputs.file_name }}"
-          release_link: "https://github.com/${{ github.repository }}/releases/tag/${{ env.tag_name }}"
+          download_link: ${{ steps.prepare_download_links.outputs.download_link }}
+          release_link: ${{ steps.prepare_download_links.outputs.release_link }}
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
