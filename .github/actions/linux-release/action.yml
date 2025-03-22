@@ -1,32 +1,18 @@
 name: 'Linux Release'
-description: 'Archive the Linux build files, rename the zip file, create a GitHub release, and upload the asset.'
+description: 'Create a GitHub release, and upload the asset.'
 runs:
   using: 'composite'
 
   steps:
-    - name: Archive Linux Build Files
-      id: archive_linux_build
-      shell: bash
-      run: |
-        # Navigate to the build directory
-        cd build/linux/x64/release/bundle
-
-        # Create a zip archive with the correct file name
-        FILE_NAME="linux-build-${{ inputs.tag_name }}.zip"
-        zip -r "${FILE_NAME}" .
-
-        # Set the file name as an output
-        echo "file_name=${FILE_NAME}" >> $GITHUB_OUTPUT
-
     - name: Create Linux Release
       id: create_linux_release
       uses: softprops/action-gh-release@v2
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }} # Use the input instead of secrets.GITHUB_TOKEN
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ inputs.tag_name }}
-        release_name: "${{ inputs.release_name }}"
-        body: "${{ inputs.release_body }}"
+        tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
+        release_name: "${{ steps.get_tag_name.outputs.tag_name }}"
+        body: "${{ steps.get_tag_message.outputs.release_body }}"
         draft: false
         prerelease: false
 
@@ -34,10 +20,9 @@ runs:
       id: upload_linux_release_asset
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ inputs.tag_name }}
-        files: build/linux/x64/release/bundle/${{ steps.archive_linux_build.outputs.file_name }}
+        tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
+        files: build/linux/x64/release/bundle/${{ steps.build_linux_app.outputs.file_name }}
 
-# Define action inputs
 inputs:
   tag_name:
     description: 'The name of the tag'
@@ -51,9 +36,6 @@ inputs:
   github_token:
     description: 'The GitHub token for creating the release'
     required: true
-
-# Define action outputs
-outputs:
   file_name:
-    description: 'The name of the uploaded file'
-    value: ${{ steps.archive_linux_build.outputs.file_name }}
+    description: 'The name of the asset file  , that must be upload/attach to release form.'
+    required: true
