@@ -27,17 +27,20 @@ jobs:
           echo "Extracted tag name: $TAG_NAME"
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
 
-      - name: Get tag message
+      - name: Get and sanitize tag message
         id: get_tag_message
         shell: bash
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
           TAG_MESSAGE=$(git tag -l --format='%(contents)' $TAG_NAME)
           
-          # Write the tag message to a file
+          # Sanitize the tag message: replace newlines with \n and escape double quotes
+          SANITIZED_TAG_MESSAGE=$(echo "$TAG_MESSAGE" | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+          
+          # Write the sanitized tag message to a file
           TAG_MESSAGE_FILE="tag_message.txt"
-          echo "$TAG_MESSAGE" > $TAG_MESSAGE_FILE
-          echo "Tag message written to: $TAG_MESSAGE_FILE"
+          echo "$SANITIZED_TAG_MESSAGE" > $TAG_MESSAGE_FILE
+          echo "Sanitized tag message written to: $TAG_MESSAGE_FILE"
           echo "tag_message_file=$TAG_MESSAGE_FILE" >> $GITHUB_OUTPUT
 
       - name: Setup Flutter
