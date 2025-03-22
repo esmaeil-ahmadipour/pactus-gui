@@ -1,4 +1,4 @@
-name: 'Install Windows dependencies'
+name: 'Install Windows Build Dependencies'
 description: 'Install Windows dependencies'
 runs:
   using: 'composite'
@@ -6,7 +6,18 @@ runs:
     - name: Install Windows dependencies
       shell: pwsh
       run: |
-        choco install -y cmake
+        # Install Chocolatey (if not already installed)
+        if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+          Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+        }
+
+        # Install required tools using Chocolatey
+        choco install -y pkgconfiglite
+        choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
         choco install -y ninja
         choco install -y visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.NativeDesktop"
         choco install -y 7zip
+        choco install -y openssl
+        choco install -y curl
