@@ -38,7 +38,7 @@ jobs:
           TAG_MESSAGE_FILE="tag_message.txt"
           echo "$TAG_MESSAGE" > $TAG_MESSAGE_FILE
           echo "Tag message written to: $TAG_MESSAGE_FILE"
-          echo "Tag message written to: $(cat ${{ TAG_MESSAGE }})"
+          echo "Tag message written to file: $(cat ${{ $TAG_MESSAGE_FILE }})"
           echo "tag_message_file=$TAG_MESSAGE_FILE" >> $GITHUB_OUTPUT
 
       - name: Setup Flutter
