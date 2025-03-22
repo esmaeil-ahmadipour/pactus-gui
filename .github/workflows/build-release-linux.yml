@@ -22,10 +22,6 @@ jobs:
       - name: Extract Tag Details
         id: extract_tag
         uses: ./.github/actions/extract-tag-details
-
-      - name: Extract Tag Details
-        id: extract_tag
-        uses: ./.github/actions/extract-tag-details
         with:
           full_tag_ref: ${{ github.ref }}
 
