@@ -30,29 +30,14 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Install Flutter dependencies
+        uses: ./.github/actions/prepare-release
+
       - name: Install Linux dependencies
         uses: ./.github/actions/linux-install-dependencies
 
       - name: Enable Linux desktop
         run: flutter config --enable-linux-desktop
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Generate Localization Files
-        uses: ./.github/actions/generate-localization
-
-      - name: Generate Asset Files
-        uses: ./.github/actions/generate-assets
-
-      - name: Generate some files by build runner
-        run: dart run build_runner build --delete-conflicting-outputs
-
-      - name: Rearrange Code Style
-        run: dart format .
-
-      - name: Run Flutter Analyze
-        run: flutter analyze
 
       - name: Fetch and Extract Files
         uses: ./.github/actions/linux-extract-files
@@ -69,13 +54,46 @@ jobs:
           release_body: "${{ steps.extract_tag.outputs.description }}"
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the secret as an input
 
+      - name: Archive Linux Build Files
+        id: archive_linux_build
+        shell: bash
+        run: |
+          # Navigate to the build directory
+          cd build/linux/x64/release/bundle
+          
+          # Create a zip archive with the correct file name
+          FILE_NAME="linux-build-${{ env.tag_name }}.zip"
+          zip -r "${FILE_NAME}" .
+          
+          # Set the file name as an output
+          echo "file_name=${FILE_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Create Linux Release
+        id: create_linux_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.tag_name }}
+          release_name: "${{ inputs.release_name }}"
+          body: "${{ inputs.release_body }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload Linux Release Asset
+        id: upload_linux_release_asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.tag_name }}
+          files: build/linux/x64/release/bundle/${{ steps.archive_linux_build.outputs.file_name }}
 
       - name: Prepare Download Links
         id: prepare_download_links
         uses: ./.github/actions/prepare-download-links
         with:
-          tag_name: ${{ inputs.tag_name }}
-          file_name: ${{ steps.release_action.outputs.file_name }}
+          tag_name: ${{ env.tag_name }}
+          file_name: ${{ steps.archive_linux_build.outputs.file_name }}
+
 
       - name: Send Discord Notification
         uses: ./.github/actions/notification-to-discord
