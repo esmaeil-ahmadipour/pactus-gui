@@ -8,11 +8,11 @@ runs:
       id: create_linux_release
       uses: softprops/action-gh-release@v2
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       with:
-        tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
-        release_name: "${{ steps.get_tag_name.outputs.tag_name }}"
-        body: "${{ steps.get_tag_message.outputs.release_body }}"
+        tag_name: ${{ inputs.tag_name }}
+        release_name: "${{ inputs.release_name }}"
+        body: "${{ inputs.release_body }}"
         draft: false
         prerelease: false
 
@@ -20,8 +20,8 @@ runs:
       id: upload_linux_release_asset
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
-        files: build/linux/x64/release/bundle/${{ steps.build_linux_app.outputs.file_name }}
+        tag_name: ${{ inputs.tag_name }}
+        files: build/linux/x64/release/bundle/${{ inputs.file_name }}
 
 inputs:
   tag_name:
