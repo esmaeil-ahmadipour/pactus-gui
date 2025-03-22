@@ -1,5 +1,5 @@
 name: 'Extract Tag Details'
-description: 'Extract tag details and create a description.'
+description: 'Extract tag details and write the tag message to a file.'
 inputs:
   full_tag_ref:
     description: 'The full tag reference (e.g., refs/tags/v1.0.0)'
@@ -8,9 +8,9 @@ outputs:
   tag_name:
     description: 'The name of the tag'
     value: ${{ steps.extract_tag.outputs.tag_name }}
-  tag_message:
-    description: 'The message attached to the tag'
-    value: ${{ steps.get_tag_message.outputs.tag_message }}
+  tag_message_file:
+    description: 'The path to the file containing the tag message'
+    value: ${{ steps.get_tag_message.outputs.tag_message_file }}
 runs:
   using: 'composite'
   steps:
@@ -28,5 +28,9 @@ runs:
       run: |
         TAG_NAME=${INPUT_FULL_TAG_REF#refs/tags/}
         TAG_MESSAGE=$(git tag -l --format='%(contents)' $TAG_NAME)
-        echo "Extracted tag message: $TAG_MESSAGE"
-        echo "tag_message=$TAG_MESSAGE" >> $GITHUB_OUTPUT
+
+        # Write the tag message to a file
+        TAG_MESSAGE_FILE="tag_message.txt"
+        echo "$TAG_MESSAGE" > $TAG_MESSAGE_FILE
+        echo "Tag message written to: $TAG_MESSAGE_FILE"
+        echo "tag_message_file=$TAG_MESSAGE_FILE" >> $GITHUB_OUTPUT
