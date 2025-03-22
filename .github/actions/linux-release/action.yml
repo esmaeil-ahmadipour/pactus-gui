@@ -32,6 +32,7 @@ runs:
         prerelease: false
 
     - name: Upload Linux Release Asset
+      id: upload_linux_release_asset
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ inputs.tag_name }}
@@ -51,3 +52,9 @@ inputs:
   github_token:
     description: 'The GitHub token for creating the release'
     required: true
+
+# Define action outputs
+outputs:
+  file_name:
+    description: 'The name of the uploaded file'
+    value: ${{ steps.upload_linux_release_asset.outputs.file_name }}
