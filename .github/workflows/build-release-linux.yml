@@ -23,6 +23,12 @@ jobs:
         id: extract_tag
         uses: ./.github/actions/extract-tag-details
 
+      - name: Extract Tag Details
+        id: extract_tag
+        uses: ./.github/actions/extract-tag-details
+        with:
+          full_tag_ref: ${{ github.ref }}
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -50,8 +56,8 @@ jobs:
         uses: ./.github/actions/linux-release
         with:
           tag_name: ${{ steps.extract_tag.outputs.tag_name }}
-          release_name: "${{ steps.extract_tag.outputs.title }}"
-          release_body: "${{ steps.extract_tag.outputs.description }}"
+          release_name: "${{ steps.extract_tag.outputs.tag_name }}"
+          release_body: "${{ steps.extract_tag.outputs.tag_message }}"
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the secret as an input
 
       - name: Archive Linux Build Files
