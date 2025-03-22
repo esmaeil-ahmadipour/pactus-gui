@@ -19,33 +19,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Extract tag name
-        id: get_tag_name
-        shell: bash
-        run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          echo "Extracted tag name: $TAG_NAME"
-          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
-
-      - name: Get and prepare tag message
-        id: get_tag_message
-        shell: bash
-        run: |
-          # Extract tag name
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          
-          # Get the tag message
-          TAG_MESSAGE=$(git tag -l --format='%(contents)' $TAG_NAME)
-          
-          # Write the tag message to a file (optional, if you still need the file)
-          TAG_MESSAGE_FILE="tag_message.txt"
-          echo "$TAG_MESSAGE" > $TAG_MESSAGE_FILE
-          echo "Tag message written to: $TAG_MESSAGE_FILE"
-          
-          # Set the release body as an output
-          echo "release_body<<EOF" >> $GITHUB_OUTPUT
-          echo "$TAG_MESSAGE" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Extract Tag Details
+        id: get_tag_details
+        uses: ./.github/actions/extract-tag-details
+        with:
+          github_ref: ${{ github.ref }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -64,14 +42,14 @@ jobs:
         id: build_linux_app
         uses: ./.github/actions/linux-build-app
         with:
-          tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
+          tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
 
       - name: Linux Release
         uses: ./.github/actions/linux-release
         with:
-          tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
-          release_name: ${{ steps.get_tag_name.outputs.tag_name }}
-          release_body: ${{ steps.get_tag_message.outputs.release_body }}
+          tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
+          release_name: ${{ steps.get_tag_details.outputs.tag_name }}
+          release_body: ${{ steps.get_tag_details.outputs.release_body }}
           file_name: ${{ steps.build_linux_app.outputs.file_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -79,7 +57,7 @@ jobs:
         id: prepare_download_links
         uses: ./.github/actions/prepare-download-links
         with:
-          tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
+          tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
           file_name: ${{ steps.build_linux_app.outputs.file_name }}
 
       - name: Send Discord Notification
