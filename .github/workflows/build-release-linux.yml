@@ -23,7 +23,7 @@ jobs:
         id: get_tag_name
         shell: bash
         run: |
-          TAG_NAME=${INPUT_FULL_TAG_REF#refs/tags/}
+          TAG_NAME=${GITHUB_REF#refs/tags/}
           echo "Extracted tag name: $TAG_NAME"
           echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
 
@@ -31,7 +31,7 @@ jobs:
         id: get_tag_message
         shell: bash
         run: |
-          TAG_NAME=${INPUT_FULL_TAG_REF#refs/tags/}
+          TAG_NAME=${GITHUB_REF#refs/tags/}
           TAG_MESSAGE=$(git tag -l --format='%(contents)' $TAG_NAME)
           
           # Write the tag message to a file
