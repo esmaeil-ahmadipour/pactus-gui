@@ -62,13 +62,20 @@ jobs:
       - name: Build application
         run: flutter build linux --release
 
+      - name: Read tag message file
+        id: read_tag_message
+        shell: bash
+        run: |
+          RELEASE_BODY=$(cat ${{ steps.get_tag_message.outputs.tag_message_file }})
+          echo "release_body=$RELEASE_BODY" >> $GITHUB_OUTPUT
+
       - name: Linux Release
         id: linux_release
         uses: ./.github/actions/linux-release
         with:
           tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
           release_name: ${{ steps.get_tag_name.outputs.tag_name }}
-          release_body: $(cat ${{ steps.get_tag_message.outputs.tag_message_file}})
+          release_body:  ${{ steps.read_tag_message.outputs.release_body}}
 
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the secret as an input
 
