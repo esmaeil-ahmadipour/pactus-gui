@@ -1,4 +1,4 @@
-name: 'Build Linux Application'
+name: 'Build Linux Release Artifacts'
 description: 'Build Linux Application'
 
 inputs:

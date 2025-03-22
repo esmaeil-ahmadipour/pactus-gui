@@ -1,4 +1,4 @@
-name: 'Linux Release'
+name: 'Upload Linux Release Assets'
 description: 'Create a GitHub release, and upload the asset.'
 runs:
   using: 'composite'

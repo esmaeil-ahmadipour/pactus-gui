@@ -16,6 +16,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
       - name: Generate Localization Files
-        uses: ./.github/actions/generate-localization
+        uses: ./.github/actions/generate-locale-files
       - name: Validate Localization Files
         uses: ./.github/actions/validate-localization

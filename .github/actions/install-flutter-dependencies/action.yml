@@ -1,4 +1,4 @@
-name: 'Install Flutter dependencies'
+name: 'Install Flutter Project Dependencies'
 description: 'Install dependencies, generate files, format code, and run Flutter analyze.'
 inputs:
   flutter_version:
@@ -8,7 +8,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Set up Flutter
+    - name: Set Up Flutter Environment
       shell: bash
       run: |
         flutter upgrade ${{ inputs.flutter_version }}
@@ -18,7 +18,7 @@ runs:
       run: flutter pub get
 
     - name: Generate Localization Files
-      uses: ./.github/actions/generate-localization
+      uses: ./.github/actions/generate-locale-files
 
     - name: Generate Asset Files
       uses: ./.github/actions/generate-assets
