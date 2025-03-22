@@ -19,11 +19,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Extract Tag Details
-        id: extract_tag
-        uses: ./.github/actions/extract-tag-details
-        with:
-          full_tag_ref: ${{ github.ref }}
+      - name: Extract tag name
+        id: get_tag_name
+        shell: bash
+        run: |
+          TAG_NAME=${INPUT_FULL_TAG_REF#refs/tags/}
+          echo "Extracted tag name: $TAG_NAME"
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+      - name: Get tag message
+        id: get_tag_message
+        shell: bash
+        run: |
+          TAG_NAME=${INPUT_FULL_TAG_REF#refs/tags/}
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' $TAG_NAME)
+          
+          # Write the tag message to a file
+          TAG_MESSAGE_FILE="tag_message.txt"
+          echo "$TAG_MESSAGE" > $TAG_MESSAGE_FILE
+          echo "Tag message written to: $TAG_MESSAGE_FILE"
+          echo "tag_message_file=$TAG_MESSAGE_FILE" >> $GITHUB_OUTPUT
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -51,9 +66,9 @@ jobs:
         id: linux_release
         uses: ./.github/actions/linux-release
         with:
-          tag_name: "v10.1.1 ${{ steps.extract_tag.outputs.tag_name }}"
-          release_name: "${{ steps.extract_tag.outputs.tag_name }}"
-          release_body: $(cat ${{ steps.extract_tag.outputs.tag_message_file }})
+          tag_name: "${{ steps.get_tag_name.outputs.tag_name }}"
+          release_name: "${{ steps.get_tag_name.outputs.tag_name }}"
+          release_body: $(cat ${{ steps.get_tag_name.outputs.tag_message_file }})
 
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the secret as an input
 
