@@ -1,4 +1,4 @@
-name: 'Prepare Download Links'
+name: 'Generate Release Download Links'
 description: 'Prepare download and release links.'
 inputs:
   tag_name:

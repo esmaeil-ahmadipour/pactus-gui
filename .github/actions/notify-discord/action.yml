@@ -1,4 +1,4 @@
-name: 'Send Discord Notification'
+name: 'Notify Discord About Release'
 description: 'Send a Discord notification for a new release.'
 runs:
   using: 'composite'
@@ -11,13 +11,9 @@ runs:
         args: |
           🚀 **${{ inputs.os }} Release Published!**
           
-          📦 Version: ${{ inputs.os }} Release ${{ github.run_number }}
-          🔄 PR: #${{ github.event.pull_request.number }} - ${{ github.event.pull_request.title }}
-          👤 Requested by: ${{ github.event.pull_request.user.login }}
-          ✅ Merged by: ${{ github.event.pull_request.merged_by.login }}
-          
+          📦 Version: ${{ inputs.os }} Release ${{ github.run_number }}       
           📥 *Download Link:*
-          [${{ inputs.os }} Build](${{ inputs.download_link }})
+          [Download ${{ inputs.os }} Build](${{ inputs.download_link }})
           
           🔍 [View Release](${{ inputs.release_link }})
 
@@ -33,4 +29,7 @@ inputs:
     required: true
   release_link:
     description: 'The link to the GitHub release.'
+    required: true
+  tag_name:
+    description: 'The name of the tag'
     required: true

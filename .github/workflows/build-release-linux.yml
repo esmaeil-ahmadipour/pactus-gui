@@ -19,32 +19,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Extract Tag Details
-        id: get_tag_details
-        uses: ./.github/actions/extract-tag-details
-        with:
-          github_ref: ${{ github.ref }}
-
-      - name: Setup Flutter
+      - name: Set Up Flutter Environment
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.3'
           channel: 'stable'
           cache: true
 
-      - name: Install Flutter dependencies
-        uses: ./.github/actions/preparing-release
+      - name: Install Flutter Project Dependencies
+        uses: ./.github/actions/install-flutter-dependencies
 
-      - name: Install Linux dependencies
+      - name: Install Linux Build Dependencies
         uses: ./.github/actions/linux-install-dependencies
 
-      - name: Build Linux Application
+      - name: Prepare Tag Metadata
+        id: get_tag_details
+        uses: ./.github/actions/extract-tag-metadata
+        with:
+          github_ref: ${{ github.ref }}
+
+      - name: Build Linux Release Artifacts
         id: build_linux_app
-        uses: ./.github/actions/linux-build-app
+        uses: ./.github/actions/linux-build-artifacts
         with:
           tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
 
-      - name: Linux Release
+      - name: Upload Linux Release Assets
         uses: ./.github/actions/linux-release
         with:
           tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
@@ -53,17 +53,18 @@ jobs:
           file_name: ${{ steps.build_linux_app.outputs.file_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Prepare Download Links
+      - name: Generate Release Download Links
         id: prepare_download_links
-        uses: ./.github/actions/prepare-download-links
+        uses: ./.github/actions/generate-download-links
         with:
           tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
           file_name: ${{ steps.build_linux_app.outputs.file_name }}
 
-      - name: Send Discord Notification
-        uses: ./.github/actions/notification-to-discord
+      - name: Notify Discord About Release
+        uses: ./.github/actions/notify-discord
         with:
           os: Linux
           download_link: ${{ steps.prepare_download_links.outputs.download_link }}
           release_link: ${{ steps.prepare_download_links.outputs.release_link }}
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          tag_name: ${{ steps.get_tag_details.outputs.tag_name }}

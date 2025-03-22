@@ -1,4 +1,4 @@
-name: 'Extract Tag Details'
+name: 'Prepare Tag Metadata'
 description: 'Extract tag details and write the tag message to a file.'
 inputs:
   github_ref:
