@@ -4,21 +4,15 @@ runs:
   using: 'composite'
   steps:
     - name: Send Discord Notification
-      uses: Ilshidur/action-discord@master
+      shell: bash
+      run: |
+        curl -X POST -H "Content-Type: application/json" \
+        -d '{
+          "content": "🚀 **${{ inputs.os }} Release Published!**\n\n📦 Version: Release ${{ inputs.tag_name }}\n\n📥 *Download Link:* [Download ${{ inputs.os }} Build](${{ inputs.download_link }})\n\n🔍 [View Release](${{ inputs.release_link }})\n\n${{ inputs.release_body }}"
+        }' \
+        "${{ inputs.discord_webhook }}"
       env:
         DISCORD_WEBHOOK: ${{ inputs.discord_webhook }}
-      with:
-        args: |
-          🚀 **${{ inputs.os }} Release Published!**
-          
-          📦 Version:  Release ${{ inputs.tag_name }}       
-             Details:
-             ${{ inputs.release_body }}       
-          
-          📥 *Download Link:*
-          [Download ${{ inputs.os }} Build](${{ inputs.download_link }})
-          
-          🔍 [View Release](${{ inputs.release_link }})
 
 inputs:
   discord_webhook:
