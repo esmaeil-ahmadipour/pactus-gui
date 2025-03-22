@@ -46,9 +46,6 @@ jobs:
           echo "release_body<<EOF" >> $GITHUB_OUTPUT
           echo "$TAG_MESSAGE" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          
-          # Optionally, set the tag message file path as an output (if needed)
-          echo "tag_message_file=$TAG_MESSAGE_FILE" >> $GITHUB_OUTPUT
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -78,7 +75,7 @@ jobs:
         with:
           tag_name: ${{ steps.get_tag_name.outputs.tag_name }}
           release_name: ${{ steps.get_tag_name.outputs.tag_name }}
-          release_body:  ${{ steps.get_tag_message.outputs.tag_message_file}}
+          release_body:  ${{ steps.get_tag_message.outputs.release_body}}
 
           github_token: ${{ secrets.GITHUB_TOKEN }} # Pass the secret as an input
 
