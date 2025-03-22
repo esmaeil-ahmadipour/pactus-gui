@@ -75,3 +75,4 @@ jobs:
           os: Linux
           download_link: "https://github.com/${{ github.repository }}/releases/download/${{ steps.linux_release.outputs.file_name }}"
           release_link: "https://github.com/${{ github.repository }}/releases/tag/${{ env.tag_name }}"
+          discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
