@@ -1,29 +1,22 @@
-name: 'Windows Release'
-description: 'Archive the Windows build files, rename the zip file, create a GitHub release, and upload the asset.'
+name: 'Upload Windows Release Assets'
+description: 'Create a GitHub release, and upload the asset for Windows.'
 runs:
   using: 'composite'
 
   steps:
-    - name: Archive Windows Build Files
+    - name: Set Windows Build Directory
+      id: set_windows_build_directory
       shell: pwsh
       run: |
-        # Navigate to the build directory
-        cd build\windows\x64\runner\Release
-
-        # Create a zip archive of all files in the release directory
-        Compress-Archive -Path .\* -DestinationPath windows-build.zip
-
-    - name: Rename Windows Build File
-      shell: pwsh
-      run: |
-        # Rename the zip file to include the tag name
-        Rename-Item -Path build\windows\x64\runner\Release\windows-build.zip -NewName "windows-build-${{ inputs.tag_name }}.zip"
+        # Set the build directory as an output
+        $BUILD_DIR = "build\windows\x64\runner\Release"
+        echo "build_directory=$BUILD_DIR" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 
     - name: Create Windows Release
       id: create_windows_release
       uses: softprops/action-gh-release@v2
       env:
-        GITHUB_TOKEN: ${{ inputs.github_token }} # Use the input instead of secrets.GITHUB_TOKEN
+        GITHUB_TOKEN: ${{ inputs.github_token }}
       with:
         tag_name: ${{ inputs.tag_name }}
         release_name: "${{ inputs.release_name }}"
@@ -32,12 +25,17 @@ runs:
         prerelease: false
 
     - name: Upload Windows Release Asset
+      id: upload_windows_release_asset
       uses: softprops/action-gh-release@v2
       with:
         tag_name: ${{ inputs.tag_name }}
-        files: build\windows\x64\runner\Release\windows-build-${{ inputs.tag_name }}.zip
+        files: ${{ steps.set_windows_build_directory.outputs.build_directory }}\${{ inputs.file_name }}
 
-# Define action inputs
+outputs:
+  build_directory:
+    description: 'The path to the Windows build directory.'
+    value: ${{ steps.set_windows_build_directory.outputs.build_directory }}
+
 inputs:
   tag_name:
     description: 'The name of the tag'
@@ -50,4 +48,7 @@ inputs:
     required: true
   github_token:
     description: 'The GitHub token for creating the release'
+    required: true
+  file_name:
+    description: 'The name of the asset file, that must be uploaded/attached to the release.'
     required: true

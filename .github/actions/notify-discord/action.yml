@@ -11,7 +11,10 @@ runs:
         args: |
           🚀 **${{ inputs.os }} Release Published!**
           
-          📦 Version: ${{ inputs.os }} Release ${{ github.run_number }}       
+          📦 Version:  Release ${{ inputs.tag_name }}       
+             Details:
+             ${{ inputs.release_body }}       
+          
           📥 *Download Link:*
           [Download ${{ inputs.os }} Build](${{ inputs.download_link }})
           
@@ -32,4 +35,7 @@ inputs:
     required: true
   tag_name:
     description: 'The name of the tag'
+    required: true
+  release_body:
+    description: 'The body message of the tag'
     required: true

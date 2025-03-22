@@ -1,0 +1,57 @@
+name: 'Build Windows Release Artifacts'
+description: 'Build Windows Application'
+
+inputs:
+  tag_name:
+    description: 'The name of the tag'
+    required: true
+
+outputs:
+  file_name:
+    description: 'The name of the zip file that created from build directory.'
+    value: ${{ steps.archive_windows_build.outputs.file_name }}
+  build_directory:
+    description: 'The path to the Windows build directory.'
+    value: ${{ steps.set_build_directory.outputs.build_directory }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Enable Windows desktop
+      shell: pwsh
+      run: |
+        flutter config --enable-windows-desktop
+
+    - name: Fetch and Extract Files
+      shell: pwsh
+      run: |
+        Invoke-WebRequest -Uri $env:WINDOWS_ASSETS_URL -OutFile file.zip
+        New-Item -ItemType Directory -Force -Path lib/src/core/native_resources/windows/
+        Expand-Archive -Path file.zip -DestinationPath lib/src/core/native_resources/windows/
+
+    - name: Build application
+      shell: pwsh
+      run: |
+        flutter build windows --release
+
+    - name: Set Build Directory
+      id: set_build_directory
+      shell: pwsh
+      run: |
+        # Set the build directory as an output
+        $BUILD_DIR = "build\windows\x64\runner\Release"
+        echo "build_directory=$BUILD_DIR" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+    - name: Archive Windows Build Files
+      id: archive_windows_build
+      shell: pwsh
+      run: |
+        # Navigate to the build directory
+        cd build\windows\x64\runner\Release
+        
+        # Create a zip archive with the correct file name
+        $FILE_NAME = "windows-build-${{ inputs.tag_name }}.zip"
+        Compress-Archive -Path .\* -DestinationPath $FILE_NAME
+        
+        # Set the file name as an output
+        echo "file_name=$FILE_NAME" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append

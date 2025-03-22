@@ -1,8 +1,8 @@
-name: Linux Release Build
+name: Windows Release Build
 
 # Add environment variables at the top level
 env:
-  LINUX_ASSETS_URL: "https://github.com/pactus-project/pactus/releases/download/v1.6.4/pactus-cli_1.6.4_linux_amd64.tar.gz"
+  WINDOWS_ASSETS_URL: "https://github.com/pactus-project/pactus/releases/download/v1.6.4/pactus-cli_1.6.4_windows_amd64.zip"
 
 permissions:
   contents: write
@@ -13,8 +13,8 @@ on:
       - 'v*' # Trigger on version tags like v1.2.3
 
 jobs:
-  build-and-release-linux:
-    runs-on: ubuntu-latest
+  build-and-release-windows:
+    runs-on: windows-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,8 +29,8 @@ jobs:
       - name: Install Flutter Project Dependencies
         uses: ./.github/actions/install-flutter-dependencies
 
-      - name: Install Linux Build Dependencies
-        uses: ./.github/actions/linux-install-dependencies
+      - name: Install Windows Build Dependencies
+        uses: ./.github/actions/windows-install-dependencies
 
       - name: Prepare Tag Metadata
         id: get_tag_details
@@ -38,19 +38,19 @@ jobs:
         with:
           github_ref: ${{ github.ref }}
 
-      - name: Build Linux Release Artifacts
-        id: build_linux_app
-        uses: ./.github/actions/linux-build-artifacts
+      - name: Build Windows Release Artifacts
+        id: build_windows_app
+        uses: ./.github/actions/windows-build-artifacts
         with:
           tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
 
-      - name: Upload Linux Release Assets
-        uses: ./.github/actions/linux-release
+      - name: Upload Windows Release Assets
+        uses: ./.github/actions/windows-release
         with:
           tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
           release_name: ${{ steps.get_tag_details.outputs.tag_name }}
           release_body: ${{ steps.get_tag_details.outputs.release_body }}
-          file_name: ${{ steps.build_linux_app.outputs.file_name }}
+          file_name: ${{ steps.build_windows_app.outputs.file_name }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Release Download Links
@@ -58,12 +58,13 @@ jobs:
         uses: ./.github/actions/generate-download-links
         with:
           tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
-          file_name: ${{ steps.build_linux_app.outputs.file_name }}
+          file_name: ${{ steps.build_windows_app.outputs.file_name }}
+
 
       - name: Notify Discord About Release
         uses: ./.github/actions/notify-discord
         with:
-          os: Linux
+          os: Windows (AMD64)
           download_link: ${{ steps.prepare_download_links.outputs.download_link }}
           release_link: ${{ steps.prepare_download_links.outputs.release_link }}
           discord_webhook: ${{ secrets.DISCORD_WEBHOOK }}
