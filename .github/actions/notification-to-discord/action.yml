@@ -1,22 +1,12 @@
 name: 'Send Discord Notification'
 description: 'Send a Discord notification for a new release.'
-inputs:
-  os:
-    description: 'The operating system (e.g., macOS, Linux, Windows).'
-    required: true
-  download_link:
-    description: 'The download link for the release asset.'
-    required: true
-  release_link:
-    description: 'The link to the GitHub release.'
-    required: true
 runs:
   using: 'composite'
   steps:
     - name: Send Discord Notification
       uses: Ilshidur/action-discord@master
       env:
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        DISCORD_WEBHOOK: ${{ inputs.discord_webhook }}
       with:
         args: |
           🚀 **${{ inputs.os }} Release Published!**
@@ -30,3 +20,17 @@ runs:
           [${{ inputs.os }} Build](${{ inputs.download_link }})
           
           🔍 [View Release](${{ inputs.release_link }})
+
+inputs:
+  discord_webhook:
+    description: 'The Discord webhook URL'
+    required: true
+  os:
+    description: 'The operating system (e.g., macOS, Linux, Windows).'
+    required: true
+  download_link:
+    description: 'The download link for the release asset.'
+    required: true
+  release_link:
+    description: 'The link to the GitHub release.'
+    required: true
