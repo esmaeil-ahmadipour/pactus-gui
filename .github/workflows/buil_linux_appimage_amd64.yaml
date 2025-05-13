@@ -60,7 +60,7 @@ jobs:
 
       - name: Create AppImage (AMD64)
         run: |
-          APP_NAME="cicdbuild"
+          APP_NAME="pactus-gui"
           BUNDLE_DIR="build/linux/x64/release/bundle"
           RELEASE_DIR="build/linux/x64/release"
           mkdir -p "$RELEASE_DIR"
