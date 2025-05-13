@@ -35,8 +35,14 @@ jobs:
       - name: Install Flutter Project Dependencies
         uses: ./.github/actions/utils/install-flutter-dependencies
 
-      - name: Install Linux Build Dependencies (ARM64)
-        uses: ./.github/actions/linux/install-dependencies-arm64
+      - name: Install AppImage build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libfuse2 \
+            squashfs-tools \
+            desktop-file-utils \
+            libglib2.0-bin
 
       - name: Prepare Tag Metadata
         id: get_tag_details
