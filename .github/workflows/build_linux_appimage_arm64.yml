@@ -56,10 +56,15 @@ jobs:
             desktop-file-utils \
             libglib2.0-bin
 
+
+
+
       - name: Create AppImage (ARM64)
         run: |
-          # Ensure build directory exists
+          # Ensure build directory exists and is writable
           mkdir -p "$BUNDLE_DIR"
+          sudo chown -R $(whoami):$(whoami) "$BUNDLE_DIR"
+          chmod -R u+w "$BUNDLE_DIR"
 
           # Check if the desktop file exists and create one if missing
           DESKTOP_FILE="$BUNDLE_DIR/$APP_NAME.desktop"
@@ -76,7 +81,7 @@ jobs:
             cp "linux/$APP_NAME.desktop" "$DESKTOP_FILE"
             sed -i 's/Categories=.*/Categories=Utility;/' "$DESKTOP_FILE"
           fi
-
+      
           # Copy icon if it exists
           if [ -f "linux/$APP_NAME.png" ]; then
             cp "linux/$APP_NAME.png" "$BUNDLE_DIR/"
@@ -86,9 +91,11 @@ jobs:
           wget -q -O appimagetool-aarch64 https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage
           chmod +x appimagetool-aarch64
 
-          ./appimagetool-aarch64 "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
+   	 ./appimagetool-aarch64 "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
 
-          echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
+    	  echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
+
+
 
       - name: Upload Linux Release ZIP
         uses: ./.github/actions/linux/release
