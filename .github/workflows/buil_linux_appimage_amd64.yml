@@ -58,6 +58,18 @@ jobs:
           tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
           arch: x64
 
+
+      - name: Install AppImage build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libfuse2 \
+            squashfs-tools \
+            desktop-file-utils \
+            libglib2.0-bin
+
+
+
       - name: Create AppImage (AMD64)
         run: |
           APP_NAME="pactus-gui"
