@@ -58,9 +58,8 @@ jobs:
 
       - name: Create AppImage (ARM64)
         run: |
-          # Ensure build directory exists and is writable
+          # Ensure build directory exists
           mkdir -p "$BUNDLE_DIR"
-          chmod -R u+rwX "$BUNDLE_DIR"
 
           # Check if the desktop file exists and create one if missing
           DESKTOP_FILE="$BUNDLE_DIR/$APP_NAME.desktop"
@@ -89,7 +88,6 @@ jobs:
 
           ./appimagetool-aarch64 "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
 
-          # Set appimage path as environment variable
           echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
 
       - name: Upload Linux Release ZIP
