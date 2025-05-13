@@ -80,6 +80,8 @@ jobs:
           APP_NAME="pactus-gui"
           BUNDLE_DIR="build/linux/arm64/release/bundle"
           RELEASE_DIR="build/linux/arm64/release"
+          TAG_NAME="${{ steps.get_tag_details.outputs.tag_name }}"
+          APPIMAGE_PATH="$RELEASE_DIR/$APP_NAME-${TAG_NAME}-arm64.AppImage"
 
           # Ensure proper permissions on build dir
           sudo mkdir -p "$BUNDLE_DIR"
@@ -114,12 +116,16 @@ jobs:
           sudo chown -R $USER:$USER "$BUNDLE_DIR" "$RELEASE_DIR"
           chmod -R u+w "$BUNDLE_DIR" "$RELEASE_DIR"
 
-          # Download appimagetool
-          wget -q -O appimagetool.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
-          chmod +x appimagetool.AppImage
+          # Download and run appimagetool
+          wget -q -O appimagetool-x86_64.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
 
-          # Create AppImage
-          ARCH=aarch64 ./appimagetool.AppImage "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-v0.1.4-arm64.AppImage"
+          # Build AppImage for ARM64
+          ARCH=aarch64 ./appimagetool-x86_64.AppImage "$BUNDLE_DIR" "$APPIMAGE_PATH"
+
+          # Export path to GitHub environment
+          echo "appimage_file=$APPIMAGE_PATH" >> $GITHUB_ENV
+
 
       - name: Upload ZIP Artifact (Linux arm64)
         uses: ./.github/actions/linux/release
