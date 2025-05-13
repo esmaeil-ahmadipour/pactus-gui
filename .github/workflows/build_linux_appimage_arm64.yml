@@ -58,13 +58,17 @@ jobs:
 
       - name: Create AppImage (ARM64)
         run: |
-          # Ensure build directory exists and is writable
+          # Ensure build directory exists
           mkdir -p "$BUNDLE_DIR"
-          sudo chown -R $(whoami):$(whoami) "$BUNDLE_DIR"
-          chmod -R u+w "$BUNDLE_DIR"
 
-          # Check if the desktop file exists and create one if missing
+          # Fix ownership and permissions (avoids permission denied errors)
+          sudo chown -R $(id -u):$(id -g) "$BUNDLE_DIR"
+          chmod -R u+rw "$BUNDLE_DIR"
+
+          # Define path to .desktop file
           DESKTOP_FILE="$BUNDLE_DIR/$APP_NAME.desktop"
+
+          # Create .desktop file if not provided
           if [ ! -f "linux/$APP_NAME.desktop" ]; then
             echo "[Desktop Entry]" > "$DESKTOP_FILE"
             echo "Version=1.0" >> "$DESKTOP_FILE"
@@ -79,7 +83,7 @@ jobs:
             sed -i 's/Categories=.*/Categories=Utility;/' "$DESKTOP_FILE"
           fi
 
-          # Copy icon if it exists
+          # Copy icon if available
           if [ -f "linux/$APP_NAME.png" ]; then
             cp "linux/$APP_NAME.png" "$BUNDLE_DIR/"
           fi
