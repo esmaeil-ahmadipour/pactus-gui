@@ -59,7 +59,10 @@ jobs:
           APP_NAME="pactus-gui"
           BUNDLE_DIR="build/linux/arm64/release/bundle"
           RELEASE_DIR="build/linux/arm64/release"
-          mkdir -p "$RELEASE_DIR"
+
+          # Ensure build directory exists and is writable
+          mkdir -p "$BUNDLE_DIR"
+          chmod -R u+rwX "$BUNDLE_DIR"
 
           DESKTOP_FILE="$BUNDLE_DIR/$APP_NAME.desktop"
           if [ ! -f "linux/$APP_NAME.desktop" ]; then
@@ -76,17 +79,19 @@ jobs:
             sed -i 's/Categories=.*/Categories=Utility;/' "$DESKTOP_FILE"
           fi
 
+          # Copy icon if it exists
           if [ -f "linux/$APP_NAME.png" ]; then
             cp "linux/$APP_NAME.png" "$BUNDLE_DIR/"
           fi
 
-          # Use AppImageTool compiled for ARM64
+          # Download and run AppImageTool for ARM64
           wget -q -O appimagetool-aarch64 https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage
           chmod +x appimagetool-aarch64
 
           ./appimagetool-aarch64 "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
 
           echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
+
 
       - name: Upload Linux Release ZIP
         uses: ./.github/actions/linux/release
