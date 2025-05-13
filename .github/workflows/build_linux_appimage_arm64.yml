@@ -58,10 +58,8 @@ jobs:
 
       - name: Create AppImage (ARM64)
         run: |
-          # Ensure build directory exists and is writable
+          # Ensure build directory exists
           mkdir -p "$BUNDLE_DIR"
-          sudo chown -R $(whoami):$(whoami) "$BUNDLE_DIR"
-          chmod -R u+w "$BUNDLE_DIR"
 
           # Check if the desktop file exists and create one if missing
           DESKTOP_FILE="$BUNDLE_DIR/$APP_NAME.desktop"
@@ -84,14 +82,11 @@ jobs:
             cp "linux/$APP_NAME.png" "$BUNDLE_DIR/"
           fi
 
-          # Download and run AppImageTool for ARM64
-          wget -q -O appimagetool-aarch64 https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage
-          chmod +x appimagetool-aarch64
-
-          ./appimagetool-aarch64 "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
-
+          # Download and run AppImageTool (x86_64) with ARM64 target
+          wget -q -O appimagetool https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool
+          ARCH=aarch64 ./appimagetool "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
           echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
-
 
       - name: Upload Linux Release ZIP
         uses: ./.github/actions/linux/release
