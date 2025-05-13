@@ -80,6 +80,11 @@ jobs:
           APP_NAME="pactus-gui"
           BUNDLE_DIR="build/linux/arm64/release/bundle"
           RELEASE_DIR="build/linux/arm64/release"
+
+          # Ensure proper permissions on build dir
+          sudo mkdir -p "$BUNDLE_DIR"
+          sudo chown -R $USER:$USER "$BUNDLE_DIR"
+          chmod -R u+w "$BUNDLE_DIR"
           mkdir -p "$RELEASE_DIR"
 
           # Prepare .desktop file
@@ -112,6 +117,7 @@ jobs:
 
           # Export file path for release upload
           echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
+
 
       - name: Upload ZIP Artifact (Linux arm64)
         uses: ./.github/actions/linux/release
