@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=pactus-gui
+Exec=pactus-gui
+Icon=pactus-gui
+Comment=A  node management application
+Categories=Utility;
+
+# Optional fields (recommended)
+Terminal=false
