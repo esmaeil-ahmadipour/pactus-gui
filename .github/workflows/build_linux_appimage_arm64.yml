@@ -108,16 +108,14 @@ jobs:
             cp "linux/$APP_NAME.png" "$BUNDLE_DIR/"
           fi
 
-          # Download and prepare appimagetool for ARM
-          wget -q -O appimagetool-aarch64.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage
-          chmod +x appimagetool-aarch64.AppImage
+          # Download x86_64 appimagetool and use it to package ARM64 app
+          wget -q -O appimagetool.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool.AppImage
 
-          # Create AppImage
-          ./appimagetool-aarch64.AppImage "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
+          # Create AppImage with ARM64 metadata
+          ARCH=aarch64 ./appimagetool.AppImage "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
 
-          # Export file path for release upload
           echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
-
 
       - name: Upload ZIP Artifact (Linux arm64)
         uses: ./.github/actions/linux/release
