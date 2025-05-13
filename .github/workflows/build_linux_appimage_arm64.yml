@@ -56,9 +56,6 @@ jobs:
             desktop-file-utils \
             libglib2.0-bin
 
-
-
-
       - name: Create AppImage (ARM64)
         run: |
           # Ensure build directory exists and is writable
@@ -81,7 +78,7 @@ jobs:
             cp "linux/$APP_NAME.desktop" "$DESKTOP_FILE"
             sed -i 's/Categories=.*/Categories=Utility;/' "$DESKTOP_FILE"
           fi
-      
+
           # Copy icon if it exists
           if [ -f "linux/$APP_NAME.png" ]; then
             cp "linux/$APP_NAME.png" "$BUNDLE_DIR/"
@@ -91,10 +88,9 @@ jobs:
           wget -q -O appimagetool-aarch64 https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-aarch64.AppImage
           chmod +x appimagetool-aarch64
 
-   	 ./appimagetool-aarch64 "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
+          ./appimagetool-aarch64 "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage"
 
-    	  echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
-
+          echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-arm64.AppImage" >> $GITHUB_ENV
 
 
       - name: Upload Linux Release ZIP
