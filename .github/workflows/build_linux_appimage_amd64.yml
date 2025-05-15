@@ -66,9 +66,8 @@ jobs:
             libfuse2 \
             squashfs-tools \
             desktop-file-utils \
-            libglib2.0-bin
-
-
+            libglib2.0-bin \
+            fuse
 
       - name: Create AppImage (AMD64)
         run: |
@@ -77,36 +76,38 @@ jobs:
           RELEASE_DIR="build/linux/x64/release"
           mkdir -p "$RELEASE_DIR"
 
-          # Prepare .desktop file
+          # Ensure AppRun is executable
+          chmod +x "$BUNDLE_DIR/AppRun" || true
+
+          # Prepare .desktop file (add --no-sandbox if needed)
           DESKTOP_FILE="$BUNDLE_DIR/$APP_NAME.desktop"
           if [ ! -f "linux/$APP_NAME.desktop" ]; then
             echo "[Desktop Entry]" > "$DESKTOP_FILE"
             echo "Version=1.0" >> "$DESKTOP_FILE"
             echo "Type=Application" >> "$DESKTOP_FILE"
             echo "Name=${APP_NAME^}" >> "$DESKTOP_FILE"
-            echo "Exec=$APP_NAME" >> "$DESKTOP_FILE"
+            echo "Exec=$APP_NAME --no-sandbox" >> "$DESKTOP_FILE"  # <-- Critical for Flutter
             echo "Icon=$APP_NAME" >> "$DESKTOP_FILE"
-            echo "Comment=My Flutter Application" >> "$DESKTOP_FILE"
             echo "Categories=Utility;" >> "$DESKTOP_FILE"
           else
             cp "linux/$APP_NAME.desktop" "$DESKTOP_FILE"
-            sed -i 's/Categories=.*/Categories=Utility;/' "$DESKTOP_FILE"
+            sed -i 's/Exec=.*/Exec=$APP_NAME --no-sandbox/' "$DESKTOP_FILE"  # <-- Force --no-sandbox
           fi
 
-          # Copy icon if available
-          if [ -f "linux/$APP_NAME.png" ]; then
-            cp "linux/$APP_NAME.png" "$BUNDLE_DIR/"
-          fi
-
-          # Download and prepare appimagetool
+          # Download appimagetool
           wget -q -O appimagetool-x86_64.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
 
-          # Create AppImage
-          ./appimagetool-x86_64.AppImage "$BUNDLE_DIR" "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-x86_64.AppImage"
+          # Build AppImage with explicit runtime
+          ./appimagetool-x86_64.AppImage \
+            --runtime-file /usr/bin/fusermount \  # Explicitly use system FUSE
+            "$BUNDLE_DIR" \
+            "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-x86_64.AppImage"
 
-          # Export file path for release upload
-          echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-x86_64.AppImage" >> $GITHUB_ENV
+          # Validate the AppImage
+          ./$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-x86_64.AppImage --appimage-extract && \
+            echo "AppImage is valid" || \
+            (echo "AppImage validation failed!" && exit 1)
 
       - name: Upload ZIP Artifact (Linux x64)
         uses: ./.github/actions/linux/release
