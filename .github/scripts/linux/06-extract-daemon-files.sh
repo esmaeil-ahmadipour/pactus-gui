@@ -4,7 +4,7 @@ set -e
 # Set TAG and default value
 TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.7.1")
 ARCH="arm64"
-LINUX_ASSETS_URL="https://github.com/pactus-project/pactus/releases/download/${TAG_NAME}/pactus-cli_1.7.1_linux_arm64.tar.gz"
+LINUX_ASSETS_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_linux_amd64.tar.gz"
 
 echo "📌 Using TAG_NAME=$TAG_NAME"
 
