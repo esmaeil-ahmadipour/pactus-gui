@@ -13,7 +13,7 @@ on:
 
 jobs:
   build-and-release-linux-amd64:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04  # Changed from ubuntu-latest to specific LTS version
 
     outputs:
       tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
