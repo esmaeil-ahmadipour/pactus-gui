@@ -1,0 +1,50 @@
+name: Linux Release Build (AMD64 + Healthy AppImage)
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release-linux-amd64:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set Up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.3'
+          channel: 'stable'
+
+      - name: 01 - Install Dependencies
+        run: bash .github/scripts/linux/01-install-dependencies.sh
+
+      - name: 02 - Install Flutter Project Dependencies
+        run: bash .github/scripts/linux/02-install-flutter-deps.sh
+
+      - name: 03 - Build Flutter Linux Bundle
+        run: bash .github/scripts/linux/03-build.sh
+
+      - name: 04 - Prepare AppDir and Collect Files
+        run: bash .github/scripts/linux/04-prepare-appdir.sh
+
+      - name: 05 - Download AppImage Tools
+        run: bash .github/scripts/linux/05-download-tools.sh
+
+      - name: 06 - Build AppImage
+        run: bash .github/scripts/linux/06-build-appimage.sh
+
+      - name: 07 - Test AppImage (headless)
+        run: bash .github/scripts/linux/07-test.sh
+
+      - name: Upload Built AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: PactusGUI-AppImage
+          path: ./*.AppImage
