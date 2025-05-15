@@ -33,7 +33,7 @@ jobs:
 
 
       - name: Build and Collect App Files
-         run: |
+        run: |
           flutter build linux
 
           mkdir -p ../AppDir/usr/bin
