@@ -35,6 +35,17 @@ jobs:
       - name: Build Flutter Linux Bundle
         run: flutter build linux
 
+      - name: Fix Permissions on Build Output
+        run: |
+          BUNDLE_DIR="build/linux/x64/release/bundle"
+          RELEASE_DIR="release"
+
+          sudo mkdir -p "$BUNDLE_DIR"
+          sudo chown -R "$USER:$USER" "$BUNDLE_DIR"
+          chmod -R u+w "$BUNDLE_DIR"
+          mkdir -p "$RELEASE_DIR"
+
+
       - name: Prepare AppDir
         run: |
           mkdir -p AppDir/usr/bin
