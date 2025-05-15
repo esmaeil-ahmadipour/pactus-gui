@@ -44,8 +44,28 @@ jobs:
 
 
       - name: Build Flutter Linux Bundle
-        working-directory: pactus-gui
         run: flutter build linux
+
+      - name: Prepare AppDir
+        run: |
+          mkdir -p AppDir/usr/bin
+
+          # Copy built Flutter bundle
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+
+          # Copy your .desktop and icon files
+          cp linux/pactus-gui.desktop AppDir/
+          cp linux/pactus-gui.png AppDir/
+
+          # Create AppRun
+          cat <<'EOF' > AppDir/AppRun
+          #!/bin/bash
+          HERE="$(dirname "$(readlink -f "$0")")"
+          exec "$HERE/usr/bin/pactus-gui" "$@"
+          EOF
+
+          chmod +x AppDir/AppRun
+
 
       - name: Prepare AppDir
         run: |
