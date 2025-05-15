@@ -37,11 +37,14 @@ jobs:
       - name: 05 - Download AppImage Tools
         run: bash .github/scripts/linux/05-download-tools.sh
 
-      - name: 06 - Build AppImage
-        run: bash .github/scripts/linux/06-build-appimage.sh
+      - name: 06 - Extract daemon files
+        run: bash .github/scripts/linux/06-extract-daemon-files.sh
 
-      - name: 07 - Test AppImage (headless)
-        run: bash .github/scripts/linux/07-test.sh
+      - name: 07 - Build AppImage
+        run: bash .github/scripts/linux/07-build-appimage.sh
+
+      - name: 08 - Test AppImage (headless)
+        run: bash .github/scripts/linux/08-test.sh
 
       - name: Upload Built AppImage
         uses: actions/upload-artifact@v4
