@@ -68,6 +68,8 @@ jobs:
             desktop-file-utils \
             libglib2.0-bin \
             fuse
+            imagemagick  # For icon fallback generation if needed
+
 
       - name: Create AppImage (AMD64)
         run: |
