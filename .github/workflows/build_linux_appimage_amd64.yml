@@ -32,21 +32,10 @@ jobs:
         uses: ./.github/actions/utils/install-flutter-dependencies
 
 
-      - name: Build and Collect App Files
-        run: |
-          flutter build linux
-
-          mkdir -p ../AppDir/usr/bin
-          cp -r build/linux/x64/release/bundle/* ../AppDir/usr/bin/
-          cp linux/pactus-gui.desktop ../AppDir/
-          cp linux/pactus-gui.png ../AppDir/
-
-
       - name: Build Flutter Linux Bundle
         run: flutter build linux
- 
 
-      - name: Prepare AppDir
+      - name: Prepare AppDir and Collect Files
         run: |
           mkdir -p AppDir/usr/bin
 
@@ -65,7 +54,6 @@ jobs:
           EOF
 
           chmod +x AppDir/AppRun
-
 
 
       - name: Download AppImage Tools
