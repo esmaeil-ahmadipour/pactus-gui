@@ -26,37 +26,40 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y libfuse2 build-essential patchelf wget zsync squashfs-tools \
-            libgtk-3-dev libglib2.0-dev libnss3 libxss1 libasound2 libx11-dev
+            libgtk-3-dev libglib2.0-dev libnss3 libxss1 libasound2 libx11-dev libgl1-mesa-dev
 
       - name: Install Flutter Project Dependencies
         uses: ./.github/actions/utils/install-flutter-dependencies
 
       - name: Build Flutter Linux Bundle
-        run: flutter build linux
+        run: flutter build linux --release
 
       - name: Prepare AppDir and Collect Files
         run: |
+          rm -rf AppDir
           mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/512x512/apps
 
-          # Copy built Flutter bundle
-          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          # Copy the main binary
+          cp build/linux/x64/release/bundle/pactus-gui AppDir/usr/bin/
+          chmod +x AppDir/usr/bin/pactus-gui
 
-          # Copy your .desktop and icon files
-          cp linux/pactus-gui.desktop AppDir/
-          cp linux/pactus-gui.png AppDir/
+          # Copy desktop file and icon
+          cp linux/pactus-gui.desktop AppDir/usr/share/applications/
+          cp linux/pactus-gui.png AppDir/usr/share/icons/hicolor/512x512/apps/
 
-          # Fix .desktop Exec path (very important)
-          sed -i 's|Exec=.*|Exec=AppRun|g' AppDir/pactus-gui.desktop
-
-          # *** حذف ایجاد AppRun داخل AppDir ***
+          # Fix Exec path in desktop file
+          sed -i 's|Exec=.*|Exec=AppRun|g' AppDir/usr/share/applications/pactus-gui.desktop
 
       - name: Prepare custom AppRun file
         run: |
           cat <<'EOF' > linux/AppRun
-          #!/bin/bash
-          HERE="$(dirname "$(readlink -f "$0")")"
-          exec "$HERE/usr/bin/pactus-gui" "$@"
-          EOF
+#!/bin/bash
+HERE="$(dirname "$(readlink -f "$0")")"
+export LD_LIBRARY_PATH="$HERE/usr/lib:$LD_LIBRARY_PATH"
+exec "$HERE/usr/bin/pactus-gui" "$@"
+EOF
           chmod +x linux/AppRun
 
       - name: Download AppImage Tools
@@ -68,8 +71,8 @@ jobs:
       - name: Build AppImage
         run: |
           ./linuxdeploy --appdir AppDir \
-                        --desktop-file AppDir/pactus-gui.desktop \
-                        --icon-file AppDir/pactus-gui.png \
+                        --desktop-file AppDir/usr/share/applications/pactus-gui.desktop \
+                        --icon-file AppDir/usr/share/icons/hicolor/512x512/apps/pactus-gui.png \
                         --output appimage \
                         --custom-apprun linux/AppRun
           chmod +x ./*.AppImage
@@ -81,14 +84,11 @@ jobs:
 
       - name: Get Tag Details
         id: get_tag_details
-        run: |
-          echo "tag_name=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+        run: echo "tag_name=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
 
       - name: Set AppImage File Name
         id: prepared_artifact_file
-        run: |
-          FILE=$(ls *.AppImage | head -n 1)
-          echo "file_name=$FILE" >> "$GITHUB_OUTPUT"
+        run: echo "file_name=$(ls *.AppImage | head -n 1)" >> "$GITHUB_OUTPUT"
 
       - name: Upload Built AppImage as Artifact
         uses: actions/upload-artifact@v4
