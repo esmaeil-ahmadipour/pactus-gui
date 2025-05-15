@@ -70,76 +70,48 @@ jobs:
             fuse \
             imagemagick-6.q16
 
+      - name: Install ImageMagick (for icon fallback)
+        run: sudo apt-get install -y imagemagick
 
       - name: Create AppImage (AMD64)
         run: |
           APP_NAME="pactus-gui"
           BUNDLE_DIR="build/linux/x64/release/bundle"
           RELEASE_DIR="build/linux/x64/release"
-    
-          # Create directories and ensure permissions
-          sudo mkdir -p "$RELEASE_DIR"
-          sudo chown -R $USER:$USER "$BUNDLE_DIR" || true
-          sudo chown -R $USER:$USER "$RELEASE_DIR" || true
-    
-          # Verify bundle directory exists
-          if [ ! -d "$BUNDLE_DIR" ]; then
-            echo "Error: Bundle directory $BUNDLE_DIR not found!"
-            ls -R build/linux/x64/release
-            exit 1
-          fi
-    
-          # Create AppRun if missing
-          if [ ! -f "$BUNDLE_DIR/AppRun" ]; then
-            echo "Creating AppRun file..."
-            echo '#!/bin/sh' > "$BUNDLE_DIR/AppRun"
-            echo 'HERE=$(dirname $(readlink -f "$0"))' >> "$BUNDLE_DIR/AppRun"
-            echo 'export PATH="$HERE/usr/bin:$HERE/usr/sbin:$HERE/usr/games:$HERE/bin:$HERE/sbin:$PATH"' >> "$BUNDLE_DIR/AppRun"
-            echo 'export LD_LIBRARY_PATH="$HERE/usr/lib/:$HERE/usr/lib/x86_64-linux-gnu/:$LD_LIBRARY_PATH"' >> "$BUNDLE_DIR/AppRun"
-            echo 'export XDG_DATA_DIRS="$HERE/usr/share/:$XDG_DATA_DIRS"' >> "$BUNDLE_DIR/AppRun"
-            echo 'export PERLLIB="$HERE/usr/share/perl5/:$HERE/usr/lib/x86_64-linux-gnu/perl5/5.30/:$PERLLIB"' >> "$BUNDLE_DIR/AppRun"
-            echo 'export PYTHONPATH="$HERE/usr/share/pyshared/:$PYTHONPATH"' >> "$BUNDLE_DIR/AppRun"
-            echo 'export QT_PLUGIN_PATH="$HERE/usr/lib/x86_64-linux-gnu/qt5/plugins/:$QT_PLUGIN_PATH"' >> "$BUNDLE_DIR/AppRun"
-            echo 'exec "$HERE/usr/bin/'"$APP_NAME"'" --no-sandbox "$@"' >> "$BUNDLE_DIR/AppRun"
-            chmod +x "$BUNDLE_DIR/AppRun"
-          else
-            chmod +x "$BUNDLE_DIR/AppRun"
+
+          # Ensure icon exists (critical fix)
+          if [ ! -f "$BUNDLE_DIR/$APP_NAME.png" ]; then
+            echo "Copying icon file..."
+            if [ -f "linux/$APP_NAME.png" ]; then
+              cp "linux/$APP_NAME.png" "$BUNDLE_DIR/"
+            else
+              echo "Error: Missing required icon file linux/$APP_NAME.png"
+              echo "Creating placeholder icon..."
+              convert -size 256x256 xc:white "$BUNDLE_DIR/$APP_NAME.png" ||
+                { echo "Failed to create placeholder icon"; exit 1; }
+            fi
           fi
 
-          # Prepare .desktop file (FIXED VERSION)
-          DESKTOP_FILE="$BUNDLE_DIR/$APP_NAME.desktop"
-          if [ ! -f "linux/$APP_NAME.desktop" ]; then
-            echo "[Desktop Entry]" > "$DESKTOP_FILE"
-            echo "Version=1.0" >> "$DESKTOP_FILE"
-            echo "Type=Application" >> "$DESKTOP_FILE"
-            echo "Name=Pactus GUI" >> "$DESKTOP_FILE"  # Changed from ${APP_NAME^}
-            echo "Exec=pactus-gui --no-sandbox" >> "$DESKTOP_FILE"  # Changed from $APP_NAME
-            echo "Icon=pactus-gui" >> "$DESKTOP_FILE"  # Changed from $APP_NAME
-            echo "Categories=Utility;" >> "$DESKTOP_FILE"
-          else
-            cp "linux/$APP_NAME.desktop" "$DESKTOP_FILE"
-            sed -i 's/^Exec=.*/Exec=pactus-gui --no-sandbox/' "$DESKTOP_FILE"  # Changed $ to ^ and hardcoded name
-          fi
-
-          # Validate desktop file
-          desktop-file-validate "$DESKTOP_FILE" || true
-    
           # Download appimagetool
           wget -q -O appimagetool-x86_64.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
     
-          # Build AppImage
+          # Build AppImage with verbose output
           ./appimagetool-x86_64.AppImage \
             --runtime-file /usr/bin/fusermount \
             --no-appstream \
+            --verbose \
             "$BUNDLE_DIR" \
-            "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-x86_64.AppImage"
+            "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-x86_64.AppImage" ||
+            { echo "AppImage creation failed!"; ls -la "$BUNDLE_DIR"; exit 1; }
     
           # Validate
           if [ -f "$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-x86_64.AppImage" ]; then
             echo "AppImage built successfully!"
+            echo "appimage_file=$RELEASE_DIR/$APP_NAME-${{ steps.get_tag_details.outputs.tag_name }}-x86_64.AppImage" >> $GITHUB_ENV
           else
-            echo "AppImage creation failed!"
+            echo "AppImage validation failed!"
+            ls -la "$RELEASE_DIR"
             exit 1
           fi
 
