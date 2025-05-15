@@ -67,8 +67,8 @@ jobs:
             squashfs-tools \
             desktop-file-utils \
             libglib2.0-bin \
-            fuse
-            imagemagick  # For icon fallback generation if needed
+            fuse \
+            imagemagick-6.q16
 
 
       - name: Create AppImage (AMD64)
