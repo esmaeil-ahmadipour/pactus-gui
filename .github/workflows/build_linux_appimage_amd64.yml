@@ -31,6 +31,10 @@ jobs:
       - name: Install Flutter Project Dependencies
         uses: ./.github/actions/utils/install-flutter-dependencies
 
+      - name: Resize icon to valid AppImage resolution
+        run: |
+          sudo apt install -y imagemagick
+          convert pactus-gui/linux/pactus-gui.png -resize 512x512 pactus-gui/linux/pactus-gui.png
 
       - name: Build Flutter Linux Bundle
         run: flutter build linux
