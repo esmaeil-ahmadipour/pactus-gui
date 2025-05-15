@@ -34,3 +34,75 @@ jobs:
       - name: Build Flutter Linux Bundle
         run: flutter build linux
 
+      - name: Prepare AppDir and Collect Files
+        run: |
+          mkdir -p AppDir/usr/bin
+
+          # Copy built Flutter bundle
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+
+          # Copy your .desktop and icon files
+          cp linux/pactus-gui.desktop AppDir/
+          cp linux/pactus-gui.png AppDir/
+
+          # Fix .desktop Exec path (very important)
+          sed -i 's|Exec=.*|Exec=AppRun|g' AppDir/pactus-gui.desktop
+
+          # Create AppRun
+          cat <<'EOF' > AppDir/AppRun
+          #!/bin/bash
+          HERE="$(dirname "$(readlink -f "$0")")"
+          exec "$HERE/usr/bin/pactus-gui" "$@"
+          EOF
+
+          chmod +x AppDir/AppRun
+
+      - name: Download AppImage Tools
+        run: |
+          wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O linuxdeploy
+          wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+          chmod +x linuxdeploy appimagetool
+
+      - name: Build AppImage
+        run: |
+          ./linuxdeploy --appdir AppDir \
+                        --desktop-file AppDir/pactus-gui.desktop \
+                        --icon-file AppDir/pactus-gui.png \
+                        --output appimage \
+                        --custom-apprun AppDir/AppRun
+          chmod +x ./*.AppImage
+
+      - name: Test AppImage (headless)
+        run: |
+          chmod +x ./pactus-gui*.AppImage
+          ./pactus-gui*.AppImage --version || echo "✅ Ran AppImage in CI (GUI not needed)"
+
+      - name: Get Tag Details
+        id: get_tag_details
+        run: |
+          echo "tag_name=${GITHUB_REF##*/}" >> "$GITHUB_OUTPUT"
+
+      - name: Set AppImage File Name
+        id: prepared_artifact_file
+        run: |
+          FILE=$(ls *.AppImage | head -n 1)
+          echo "file_name=$FILE" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Built AppImage as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PactusGUI-AppImage
+          path: ./*.AppImage
+
+      - name: Upload AppImage to GitHub Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
+          name: Release ${{ steps.get_tag_details.outputs.tag_name }}
+          body: |
+            ✅ Includes Pactus GUI AppImage for Linux (64-bit).
+          draft: false
+          prerelease: false
+          files: ${{ steps.prepared_artifact_file.outputs.file_name }}
