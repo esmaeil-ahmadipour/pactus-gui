@@ -48,14 +48,16 @@ jobs:
           # Fix .desktop Exec path (very important)
           sed -i 's|Exec=.*|Exec=AppRun|g' AppDir/pactus-gui.desktop
 
-          # Create AppRun
-          cat <<'EOF' > AppDir/AppRun
+          # *** حذف ایجاد AppRun داخل AppDir ***
+
+      - name: Prepare custom AppRun file
+        run: |
+          cat <<'EOF' > linux/AppRun
           #!/bin/bash
           HERE="$(dirname "$(readlink -f "$0")")"
           exec "$HERE/usr/bin/pactus-gui" "$@"
           EOF
-
-          chmod +x AppDir/AppRun
+          chmod +x linux/AppRun
 
       - name: Download AppImage Tools
         run: |
@@ -69,7 +71,7 @@ jobs:
                         --desktop-file AppDir/pactus-gui.desktop \
                         --icon-file AppDir/pactus-gui.png \
                         --output appimage \
-                        --custom-apprun AppDir/AppRun
+                        --custom-apprun linux/AppRun
           chmod +x ./*.AppImage
 
       - name: Test AppImage (headless)
