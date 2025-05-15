@@ -32,18 +32,41 @@ jobs:
         uses: ./.github/actions/utils/install-flutter-dependencies
 
 
+      - name: Build and Collect App Files
+        working-directory: pactus-gui
+        run: |
+          flutter build linux
+
+          mkdir -p ../AppDir/usr/bin
+          cp -r build/linux/x64/release/bundle/* ../AppDir/usr/bin/
+          cp linux/pactus-gui.desktop ../AppDir/
+          cp linux/pactus-gui.png ../AppDir/
+
+
       - name: Build Flutter Linux Bundle
+        working-directory: pactus-gui
         run: flutter build linux
 
-      - name: Fix Permissions on Build Output
+      - name: Prepare AppDir
         run: |
-          BUNDLE_DIR="build/linux/x64/release/bundle"
-          RELEASE_DIR="release"
+          mkdir -p AppDir/usr/bin
 
-          sudo mkdir -p "$BUNDLE_DIR"
-          sudo chown -R "$USER:$USER" "$BUNDLE_DIR"
-          chmod -R u+w "$BUNDLE_DIR"
-          mkdir -p "$RELEASE_DIR"
+          # Copy built Flutter bundle
+          cp -r pactus-gui/build/linux/x64/release/bundle/* AppDir/usr/bin/
+
+          # Copy your .desktop and icon files
+          cp pactus-gui/linux/pactus-gui.desktop AppDir/
+          cp pactus-gui/linux/pactus-gui.png AppDir/
+
+          # Create AppRun
+          cat <<'EOF' > AppDir/AppRun
+          #!/bin/bash
+          HERE="$(dirname "$(readlink -f "$0")")"
+          exec "$HERE/usr/bin/pactus-gui" "$@"
+          EOF
+
+          chmod +x AppDir/AppRun
+
 
 
       - name: Prepare AppDir
