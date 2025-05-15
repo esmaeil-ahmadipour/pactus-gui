@@ -50,20 +50,22 @@ jobs:
         run: |
           mkdir -p AppDir/usr/bin
 
-          # Copy built files
-          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          # Copy built Flutter bundle from subdir
+          cp -r pactus-gui/build/linux/x64/release/bundle/* AppDir/usr/bin/
 
           # Use your existing .desktop and icon files
           cp pactus-gui/linux/pactus-gui.desktop AppDir/
-          cp pactus-gui/linux/pactus-gui.png AppDir/  # Make sure icon is .png and matches "Icon=" field
+          cp pactus-gui/linux/pactus-gui.png AppDir/  # Make sure this PNG exists
 
-          # Create AppRun that launches your GUI app
+          # Create AppRun to run the GUI app
           cat <<'EOF' > AppDir/AppRun
           #!/bin/bash
           HERE="$(dirname "$(readlink -f "$0")")"
           exec "$HERE/usr/bin/pactus-gui" "$@"
           EOF
+
           chmod +x AppDir/AppRun
+
 
       - name: Download AppImage Tools
         run: |
