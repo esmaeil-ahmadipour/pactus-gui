@@ -33,8 +33,7 @@ jobs:
 
 
       - name: Build and Collect App Files
-        working-directory: pactus-gui
-        run: |
+         run: |
           flutter build linux
 
           mkdir -p ../AppDir/usr/bin
