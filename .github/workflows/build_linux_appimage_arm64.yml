@@ -19,8 +19,27 @@ jobs:
       release_link: ${{ steps.prepare_links.outputs.release_link }}
       download_link: ${{ steps.prepare_links.outputs.download_link }}
 
-    runs-on: ubuntu-latest-arm64
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push multi-arch image
+        uses: docker/build-push-action@v4
+        with:
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          push: false
+          tags: user/app:latest
+
+      - name: Run build inside container for ARM64
+        run: |
+          docker run --rm -v $PWD:/app user/app:latest /bin/bash -c "make build-arm64"
+
       - name: Checkout code
         uses: actions/checkout@v4
 
