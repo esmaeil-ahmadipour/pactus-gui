@@ -1,19 +1,22 @@
 #!/bin/bash
 set -e
 
-# Generate AppImage
-./linuxdeploy --appdir AppDir \
+# Install QEMU for ARM64 emulation
+sudo apt-get update && sudo apt-get install -y qemu-user-static
+
+# Register ARM64 binary format
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+# Make linuxdeploy executable
+chmod +x linuxdeploy
+
+# Run through QEMU
+qemu-aarch64 -L /usr/aarch64-linux-gnu ./linuxdeploy \
+  --appdir AppDir \
   --desktop-file AppDir/pactus_gui.desktop \
   --icon-file AppDir/pactus_gui.png \
   --output appimage
 
-# Dynamic naming
+# Rename with ARM64 tag
 TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "untagged")
-ARCH="x86_64"
-FILE_NAME="pactus_gui-${TAG}-${ARCH}.AppImage"  # Fixed: No space around =
-
-# Rename (correct variable reference)
-mv ./*.AppImage "$FILE_NAME"  # Fixed: Added $ and quotes
-
-# Set executable permissions
-chmod +x "$FILE_NAME"
+mv ./*.AppImage "pactus_gui-${TAG}-arm64.AppImage"
