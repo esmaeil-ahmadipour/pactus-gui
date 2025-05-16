@@ -1,7 +1,7 @@
-# Use official Ubuntu 22.04 ARM64 base image
-FROM arm64v8/ubuntu:22.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
+
 
 # نصب پیش‌نیازها
 RUN apt-get update && apt-get install -y \
