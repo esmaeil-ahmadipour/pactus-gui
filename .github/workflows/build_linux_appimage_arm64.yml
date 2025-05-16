@@ -35,11 +35,11 @@ jobs:
           platforms: linux/arm64
           push: false
           load: true
-          tags: user/app:latest
+          tags: user/app:arm64-latest
 
       - name: Run build inside container for ARM64
         run: |
-          docker run --rm -v $PWD:/app user/app:latest /bin/bash -c "make build-arm64"
+          docker run --rm -v $PWD:/app user/app:arm64-latest /bin/bash -c "make build-arm64"
 
       - name: Checkout code
         uses: actions/checkout@v4
