@@ -77,18 +77,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ GITHUB_REF#refs/tags/ }}
-          release_name: "${{ inputs.release_name }}"
+          tag_name: ${{ steps.tag_data.outputs.tag_name }}
+          release_name: "Release ${{ steps.tag_data.outputs.tag_name }}"
           body: |
             ${{ steps.tag_data.outputs.tag_message }}
-            ${{ inputs.release_body }}
           draft: false
           prerelease: false
 
       - name: Upload AppImage
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ GITHUB_REF#refs/tags/ }}
+          tag_name: ${{ steps.tag_data.outputs.tag_name }}
           files: ./${{ steps.tag_data.outputs.file_name }}
 
 
