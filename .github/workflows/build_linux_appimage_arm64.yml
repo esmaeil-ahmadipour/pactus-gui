@@ -40,12 +40,12 @@ jobs:
 
       - name: Build and run Flutter build inside ARM64 container
         run: |
-          docker build --platform linux/arm64 -t my-flutter-arm64 .
-          docker run --rm -v $PWD:/app my-flutter-arm64 bash -c "
-            flutter pub get &&
-            flutter gen-l10n --output-dir=lib/l10n --arb-dir=lib/l10n &&
-            dart run build_runner build --delete-conflicting-outputs &&
-            flutter build linux --release
+         docker build --platform linux/arm64 -t my-flutter-arm64 .
+         docker run --rm -v $PWD:/app my-flutter-arm64 bash -c "
+         flutter pub get &&
+         flutter gen-l10n --output-dir=lib/l10n --arb-dir=lib/l10n &&
+         dart run build_runner build --delete-conflicting-outputs &&
+         flutter build linux --release"
 
 #      - name: Set Up Flutter
 #        uses: subosito/flutter-action@v2
