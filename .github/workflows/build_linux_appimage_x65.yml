@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'
 
+# Add environment variables at the top level
+env:
+  LINUX_ASSETS_URL: "https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_linux_amd64.tar.gz"
+
 permissions:
   contents: write
 
@@ -51,3 +55,20 @@ jobs:
         with:
           name: PactusGUI-AppImage
           path: ./*.AppImage
+
+      - name: Create Windows Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ inputs.github_token }}
+        with:
+          tag_name: ${{ inputs.tag_name }}
+          release_name: "${{ inputs.release_name }}"
+          body: "${{ inputs.release_body }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload Windows Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag_name }}
+          files: build/windows/x64/runner/Release/${{ inputs.file_name }}
