@@ -8,6 +8,7 @@ on:
 # Add environment variables at the top level
 env:
   LINUX_ASSETS_URL: "https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_linux_amd64.tar.gz"
+  ARCHITECT: "x86_64"
 
 permissions:
   contents: write
@@ -56,19 +57,17 @@ jobs:
           name: PactusGUI-AppImage
           path: ./*.AppImage
 
-
       - name: Get Tag Data
         id: tag_data
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          ARCH="x86_64"
-          FILE_NAME="pactus_gui-${TAG_NAME}-${ARCH}.AppImage"
+          FILE_NAME="pactus_gui-${TAG_NAME}-${LINUX_ASSETS_URL}.AppImage"
           TAG_MESSAGE=$(git tag -l --format='%(contents)' "$TAG_NAME" || echo "No release notes")
-        
+      
           # Escape for GitHub Actions output
           TAG_MESSAGE="${TAG_MESSAGE//'%'/'%25'}"
           TAG_MESSAGE="${TAG_MESSAGE//$'\n'/'%0A'}"
-        
+      
           echo "file_name=${FILE_NAME}" >> $GITHUB_OUTPUT
           echo "tag_message=${TAG_MESSAGE}" >> $GITHUB_OUTPUT
 
