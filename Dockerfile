@@ -28,14 +28,6 @@ RUN apt-get update && apt-get install -y \
   python3 \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# دانلود و استخراج Dart SDK برای ARM64
-RUN wget https://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-arm64-release.zip -O dart-sdk.zip \
-  && unzip dart-sdk.zip -d /usr/local \
-  && rm dart-sdk.zip \
-  && ln -s /usr/local/dart-sdk/bin/dart /usr/local/bin/dart
-
-# تنظیم متغیر محیطی برای دسترسی به دستورات Dart
-ENV PATH="/usr/local/dart-sdk/bin:${PATH}"
 
 # نصب Flutter SDK نسخه 3.27.3
 RUN curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.27.3-stable.tar.xz \
