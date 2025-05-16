@@ -13,7 +13,7 @@ echo "⬇️ Downloading daemon file from $LINUX_ASSETS_URL ..."
 curl -L -o file.tar.gz "$LINUX_ASSETS_URL"
 
 # Extract to destination
-DEST="build/linux/x64/release/bundle/usr/bin/lib/src/core/native_resources/linux/"
+DEST="build/linux/x64/release/bundle/lib/src/core/native_resources/linux/"
 mkdir -p "$DEST"
 echo "📦 Extracting to: $DEST"
 tar -xvzf file.tar.gz --strip-components=1 -C "$DEST"
