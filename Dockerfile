@@ -1,13 +1,48 @@
-FROM ubuntu:22.04
+# Use official Ubuntu 22.04 ARM64 base image
+FROM arm64v8/ubuntu:22.04
 
-RUN apt update && apt install -y \
-    curl tar xz-utils unzip git \
-    clang cmake ninja-build pkg-config libgtk-3-dev
+ENV DEBIAN_FRONTEND=noninteractive
 
-ARG FLUTTER_VERSION=3.27.3
-RUN curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz && \
-    tar -xf flutter_linux_${FLUTTER_VERSION}-stable.tar.xz && \
-    rm flutter_linux_${FLUTTER_VERSION}-stable.tar.xz
+# نصب پیش‌نیازها
+RUN apt-get update && apt-get install -y \
+  curl \
+  git \
+  unzip \
+  xz-utils \
+  libglu1-mesa \
+  build-essential \
+  libfuse2 \
+  libgtk-3-dev \
+  libglib2.0-dev \
+  libnss3 \
+  libxss1 \
+  libasound2 \
+  libx11-dev \
+  libssl-dev \
+  wget \
+  squashfs-tools \
+  patchelf \
+  tar \
+  gzip \
+  pkg-config \
+  python3 \
+  dart \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/flutter/bin:${PATH}"
+# نصب Flutter SDK نسخه 3.27.3
+RUN curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.27.3-stable.tar.xz \
+    && tar xf flutter_linux_3.27.3-stable.tar.xz -C /usr/local \
+    && rm flutter_linux_3.27.3-stable.tar.xz
+
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PATH}"
+
+# تایید نصب flutter
+RUN flutter doctor -v
+
 WORKDIR /app
+
+# کپی پروژه داخل کانتینر (در زمان build)
+COPY . /app
+
+# پیش‌فرض فرمان بیلد
+CMD ["bash"]

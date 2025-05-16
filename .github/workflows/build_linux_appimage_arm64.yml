@@ -12,43 +12,46 @@ env:
 permissions:
   contents: write
 
+#jobs:
+#  build-and-release-linux-arm64:
+#    outputs:
+#      tag_name: ${{ steps.tag_data.outputs.tag_name }}
+#      release_link: ${{ steps.prepare_links.outputs.release_link }}
+#      download_link: ${{ steps.prepare_links.outputs.download_link }}
+
+
 jobs:
   build-and-release-linux-arm64:
+    runs-on: ubuntu-latest
     outputs:
       tag_name: ${{ steps.tag_data.outputs.tag_name }}
       release_link: ${{ steps.prepare_links.outputs.release_link }}
       download_link: ${{ steps.prepare_links.outputs.download_link }}
 
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Set up QEMU
+      - name: Set up QEMU for ARM64 emulation
         uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build and push multi-arch image
-        uses: docker/build-push-action@v4
-        with:
-          platforms: linux/arm64
-          push: false
-          load: true
-          tags: user/app:arm64-latest
-
-      - name: Run build inside container for ARM64
+      - name: Build and run Flutter build inside ARM64 container
         run: |
-          docker run --rm -v $PWD:/app user/app:arm64-latest /bin/bash -c "make build-arm64"
+          docker build -t my-flutter-arm64 -f Dockerfile .
+          docker run --rm -v $PWD:/app my-flutter-arm64 bash -c "
+            flutter pub get &&
+            flutter gen-l10n --output-dir=lib/l10n --arb-dir=lib/l10n &&
+            dart run build_runner build --delete-conflicting-outputs &&
+            flutter build linux --release
 
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set Up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.27.3'
-          channel: 'stable'
+#      - name: Set Up Flutter
+#        uses: subosito/flutter-action@v2
+#        with:
+#          flutter-version: '3.27.3'
+#          channel: 'stable'
 
       - name: 01 - Install ARM64 Dependencies
         run: bash .github/scripts/linux/arm64-appimage/01-install-dependencies.sh
