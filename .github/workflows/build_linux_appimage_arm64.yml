@@ -31,28 +31,28 @@ jobs:
           channel: 'stable'
 
       - name: 01 - Install ARM64 Dependencies
-        run: bash .github/scripts/linux-arm64/01-install-dependencies.sh
+        run: bash .github/scripts/linux/x86-appimage/arm64-appimage/01-install-dependencies.sh
 
       - name: 02 - Install Flutter Project Dependencies
-        run: bash .github/scripts/linux-arm64/02-install-flutter-deps.sh
+        run: bash .github/scripts/linux/x86-appimage/arm64-appimage/02-install-flutter-deps.sh
 
       - name: 03 - Build Flutter Linux Bundle (ARM64)
-        run: bash .github/scripts/linux-arm64/03-build.sh
+        run: bash .github/scripts/linux/x86-appimage/arm64-appimage/03-build.sh
 
       - name: 04 - Extract ARM64 Daemon Files
-        run: bash .github/scripts/linux-arm64/04-extract-daemon-files.sh
+        run: bash .github/scripts/linux/x86-appimage/arm64-appimage/04-extract-daemon-files.sh
 
       - name: 05 - Prepare AppDir (ARM64)
-        run: bash .github/scripts/linux-arm64/05-prepare-appdir.sh
+        run: bash .github/scripts/linux/x86-appimage/arm64-appimage/05-prepare-appdir.sh
 
       - name: 06 - Download ARM64 AppImage Tools
-        run: bash .github/scripts/linux-arm64/06-download-tools.sh
+        run: bash .github/scripts/linux/x86-appimage/arm64-appimage/06-download-tools.sh
 
       - name: 07 - Build ARM64 AppImage
-        run: bash .github/scripts/linux-arm64/07-build-appimage.sh
+        run: bash .github/scripts/linux/x86-appimage/arm64-appimage/07-build-appimage.sh
 
       - name: 08 - Test ARM64 AppImage
-        run: bash .github/scripts/linux-arm64/08-test.sh
+        run: bash .github/scripts/linux/x86-appimage/arm64-appimage/08-test.sh
 
       - name: Upload Built AppImage
         uses: actions/upload-artifact@v4
