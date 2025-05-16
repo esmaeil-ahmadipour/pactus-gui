@@ -56,19 +56,69 @@ jobs:
           name: PactusGUI-AppImage
           path: ./*.AppImage
 
-      - name: Create Windows Release
+
+      - name: Get Tag Data
+        id: tag_data
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          ARCH="x86_64"
+          FILE_NAME="pactus_gui-${TAG_NAME}-${ARCH}.AppImage"
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' "$TAG_NAME" || echo "No release notes")
+        
+          # Escape for GitHub Actions output
+          TAG_MESSAGE="${TAG_MESSAGE//'%'/'%25'}"
+          TAG_MESSAGE="${TAG_MESSAGE//$'\n'/'%0A'}"
+        
+          echo "file_name=${FILE_NAME}" >> $GITHUB_OUTPUT
+          echo "tag_message=${TAG_MESSAGE}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         env:
-          GITHUB_TOKEN: ${{ inputs.github_token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ inputs.tag_name }}
+          tag_name: ${{ GITHUB_REF#refs/tags/ }}
           release_name: "${{ inputs.release_name }}"
-          body: "${{ inputs.release_body }}"
+          body: |
+            ${{ steps.tag_data.outputs.tag_message }}
+            ${{ inputs.release_body }}
           draft: false
           prerelease: false
 
-      - name: Upload Windows Release Asset
+      - name: Upload AppImage
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.tag_name }}
-          files: build/windows/x64/runner/Release/${{ inputs.file_name }}
+          tag_name: ${{ GITHUB_REF#refs/tags/ }}
+          files: ./${{ steps.tag_data.outputs.file_name }}
+
+
+#      - name: Get Tag Message
+#        id: get_tag_message
+#        run: |
+#          TAG_NAME=${GITHUB_REF#refs/tags/}
+#          ARCH="x86_64"
+#          FILE_NAME="pactus_gui-${TAG_NAME}-${ARCH}.AppImage"
+#          TAG_MESSAGE=$(git tag -l --format='%(contents)' "$TAG_NAME")
+#          # Escape newlines for GitHub Actions output
+#          TAG_MESSAGE="${TAG_MESSAGE//'%'/'%25'}"
+#          TAG_MESSAGE="${TAG_MESSAGE//$'\n'/'%0A'}"
+#          echo "tag_message=$TAG_MESSAGE" >> $GITHUB_OUTPUT
+#
+#
+#      - name: Create Windows Release
+#        uses: softprops/action-gh-release@v2
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: ${{ GITHUB_REF#refs/tags/ }}
+#          release_name: "${{ inputs.release_name }}"
+#          body: "${{ inputs.release_body }}"
+#          draft: false
+#          prerelease: false
+#
+#      - name: Upload Windows Release Asset
+#        uses: softprops/action-gh-release@v2
+#        with:
+#          tag_name: ${{ inputs.tag_name }}
+#          files: ./${{}}
+#  "pactus_gui-${TAG}-${ARCH}.AppImage"
