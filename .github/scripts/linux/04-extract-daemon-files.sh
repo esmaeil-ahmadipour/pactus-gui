@@ -18,7 +18,4 @@ mkdir -p "$DEST"
 echo "📦 Extracting to: $DEST"
 tar -xvzf file.tar.gz --strip-components=1 -C "$DEST"
 
-# Ensure the main executable has execute permissions
-chmod +x usr/bin/lib/src/core/native_resources/linux/pactus*
-
  echo "✅ Done. Output AppImage: $FILE_NAME"

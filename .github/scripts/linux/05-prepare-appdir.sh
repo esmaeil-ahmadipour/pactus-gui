@@ -12,4 +12,7 @@ HERE="$(dirname "$(readlink -f "$0")")"
 exec "$HERE/usr/bin/pactus_gui" "$@"
 EOF
 
+# Ensure the main executable has execute permissions
+chmod +x AppDir/usr/bin/lib/src/core/native_resources/linux/pactus*
+
 chmod +x AppDir/AppRun
