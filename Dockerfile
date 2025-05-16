@@ -1,4 +1,4 @@
-FROM arm64v8/ubuntu:22.04
+FROM ubuntu:22.04
 
 RUN apt update && apt install -y \
     curl tar xz-utils unzip git \
