@@ -18,10 +18,18 @@ mkdir -p "$DEST"
 echo "📦 Extracting to: $DEST"
 tar -xvzf file.tar.gz --strip-components=1 -C "$DEST"
 
-# Create zip file
+# Create AppImage
 cd "artifacts/linux/${ARCH}/release/bundle"
-FILE_NAME="linux-build-${ARCH}-${TAG_NAME}.zip"
-echo "🗜️ Creating zip: $FILE_NAME"
-zip -r "$FILE_NAME" .
+FILE_NAME="linux-build-${ARCH}-${TAG_NAME}.AppImage"
+echo "🖼️ Creating AppImage: $FILE_NAME"
 
-echo "✅ Done. Output zip: $FILE_NAME"
+# Ensure the main executable has execute permissions
+chmod +x usr/bin/lib/src/core/native_resources/linux/pactus*
+
+# Use linuxdeploy to create AppImage (assuming it's installed)
+linuxdeploy --appdir . --output appimage
+
+# Rename the generated AppImage to our desired filename
+mv *.AppImage "$FILE_NAME"
+
+echo "✅ Done. Output AppImage: $FILE_NAME"
