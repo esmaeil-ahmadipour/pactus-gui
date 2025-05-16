@@ -72,7 +72,7 @@ jobs:
           echo "file_name=${FILE_NAME}" >> $GITHUB_OUTPUT
           echo "tag_message=${TAG_MESSAGE}" >> $GITHUB_OUTPUT
 
-      - name: Create Release
+      - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v2
         continue-on-error: true
         env:
