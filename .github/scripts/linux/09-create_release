@@ -1,0 +1,54 @@
+#!/bin/bash
+set -e
+
+# Get current tag or use default
+TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null)
+RELEASE_TITLE="Release $TAG_NAME"
+ARCH="arm64"  # Can be overridden with ARCH env var if needed
+FILE_NAME="linux-build-$ARCH-$TAG_NAME.AppImage"
+ASSET_PATH="./artifacts/linux/$ARCH/release/bundle/$FILE_NAME"
+
+# Verify we have the required token
+if [ -z "$GITHUB_TOKEN" ]; then
+  echo "❌ Error: GITHUB_TOKEN is required"
+  exit 1
+fi
+
+# Get repository URL from GitHub Actions environment
+REPO_URL="${GITHUB_REPOSITORY}"
+REPO_API_URL="https://api.github.com/repos/$REPO_URL"
+
+echo "🚀 Creating release $TAG_NAME"
+RELEASE_RESPONSE=$(curl -s -X POST \
+  -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Accept: application/vnd.github.v3+json" \
+  -d "{
+    \"tag_name\": \"$TAG_NAME\",
+    \"name\": \"$RELEASE_TITLE\",
+    \"draft\": false,
+    \"prerelease\": false
+  }" \
+  "$REPO_API_URL/releases")
+
+# Get release ID (or find existing release)
+RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
+if [ -z "$RELEASE_ID" ] || [ "$RELEASE_ID" = "null" ]; then
+  echo "🔍 Release exists, getting ID..."
+  RELEASE_RESPONSE=$(curl -s \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "$REPO_API_URL/releases/tags/$TAG_NAME")
+  RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
+fi
+
+# Upload asset
+echo "📤 Uploading $FILE_NAME"
+UPLOAD_URL="https://uploads.github.com/repos/$REPO_URL/releases/$RELEASE_ID/assets?name=$FILE_NAME"
+
+curl -X POST \
+  -H "Authorization: token $GITHUB_TOKEN" \
+  -H "Content-Type: $(file -b --mime-type "$ASSET_PATH")" \
+  --data-binary @"$ASSET_PATH" \
+  "$UPLOAD_URL"
+
+echo "✅ Successfully uploaded $FILE_NAME to $TAG_NAME"
