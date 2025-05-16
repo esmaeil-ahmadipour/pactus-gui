@@ -1,4 +1,4 @@
-name: Linux Release Build (AMD64 + Healthy AppImage)
+name: Linux Release Build (AMD64_AppImage)
 
 on:
   push:

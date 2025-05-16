@@ -13,17 +13,12 @@ echo "⬇️ Downloading daemon file from $LINUX_ASSETS_URL ..."
 curl -L -o file.tar.gz "$LINUX_ASSETS_URL"
 
 # Extract to destination
-DEST="artifacts/linux/${ARCH}/release/bundle/usr/bin/lib/src/core/native_resources/linux/"
+DEST="AppDir/usr/bin/lib/src/core/native_resources/linux/"
 mkdir -p "$DEST"
 echo "📦 Extracting to: $DEST"
 tar -xvzf file.tar.gz --strip-components=1 -C "$DEST"
 
-# Create AppImage
-cd "artifacts/linux/${ARCH}/release/bundle"
-FILE_NAME="linux-build-${ARCH}-${TAG_NAME}.AppImage"
-echo "🖼️ Creating AppImage: $FILE_NAME"
-
 # Ensure the main executable has execute permissions
-chmod +x usr/bin/lib/src/core/native_resources/linux/*
+chmod +x usr/bin/lib/src/core/native_resources/linux/pactus*
 
  echo "✅ Done. Output AppImage: $FILE_NAME"
