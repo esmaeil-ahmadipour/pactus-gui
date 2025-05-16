@@ -88,9 +88,9 @@ jobs:
 
       - name: Upload AppImage
         uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           tag_name: ${{ steps.tag_data.outputs.tag_name }}
-          files: ./${{ steps.tag_data.outputs.file_name }}
 
 
 #      - name: Get Tag Message
