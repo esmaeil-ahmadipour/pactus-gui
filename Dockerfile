@@ -27,6 +27,8 @@ RUN apt-get update && apt-get install -y \
   pkg-config \
   python3 \
   cmake \
+  ninja-build \
+  g++ \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # نصب Dart SDK
