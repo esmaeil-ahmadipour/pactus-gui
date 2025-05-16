@@ -2,7 +2,7 @@
 set -e
 
 mkdir -p AppDir/usr/bin
-cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+cp -r build/linux/arm64/release/bundle/* AppDir/usr/bin/
 cp linux/pactus_gui.desktop AppDir/
 cp linux/pactus_gui.png AppDir/
 

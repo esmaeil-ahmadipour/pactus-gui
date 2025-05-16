@@ -6,7 +6,7 @@ inputs:
     description: 'The name of the tag'
     required: true
   arch:
-    description: 'The CPU architecture (e.g., arm64, amd64)'
+    description: 'The CPU architecture (e.g., arm64-appimage, amd64)'
     required: true
 
 outputs:
