@@ -29,6 +29,8 @@ RUN apt-get update && apt-get install -y \
   cmake \
   ninja-build \
   g++ \
+  clang \
+  clangd \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # نصب Dart SDK
