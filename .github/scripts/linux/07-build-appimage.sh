@@ -1,13 +1,19 @@
 #!/bin/bash
 set -e
 
-./linuxdeploy --appdir AppDir --desktop-file AppDir/pactus_gui.desktop --icon-file AppDir/pactus_gui.png --output appimage
+# Generate AppImage
+./linuxdeploy --appdir AppDir \
+  --desktop-file AppDir/pactus_gui.desktop \
+  --icon-file AppDir/pactus_gui.png \
+  --output appimage
 
-# Dynamic naming with version/tag
-TAG=$(git describe --tags --abbrev=0 2>/dev/null)
+# Dynamic naming
+TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "untagged")
 ARCH="x86_64"
-FILE_NAME= "pactus_gui-${TAG}-${ARCH}.AppImage"
+FILE_NAME="pactus_gui-${TAG}-${ARCH}.AppImage"  # Fixed: No space around =
 
-mv ./*.AppImage FILE_NAME
+# Rename (correct variable reference)
+mv ./*.AppImage "$FILE_NAME"  # Fixed: Added $ and quotes
 
-chmod +x ./*.AppImage
+# Set executable permissions
+chmod +x "$FILE_NAME"

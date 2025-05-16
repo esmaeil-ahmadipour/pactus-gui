@@ -2,7 +2,7 @@
 set -e
 
 # Set TAG and default value
-TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null)
+TAG_NAME=$(git describe --tags --abbrev=0 2>/dev/null || echo "untagged")
 ARCH="x86_64"
 
 # Set default URL if LINUX_ASSETS_URL is empty/unset
