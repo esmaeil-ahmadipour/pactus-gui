@@ -26,7 +26,4 @@ echo "🖼️ Creating AppImage: $FILE_NAME"
 # Ensure the main executable has execute permissions
 chmod +x usr/bin/lib/src/core/native_resources/linux/*
 
-# Rename the generated AppImage to our desired filename
-mv *.AppImage "$FILE_NAME"
-
-echo "✅ Done. Output AppImage: $FILE_NAME"
+ echo "✅ Done. Output AppImage: $FILE_NAME"
