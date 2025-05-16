@@ -43,7 +43,8 @@ RUN curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stabl
 ENV PATH="/usr/local/flutter/bin:${PATH}"
 
 # اطمینان از اینکه Flutter از Dart نصب شده در PATH استفاده می‌کند
-RUN which dart && dart --version
+RUN dart --version
+RUN which dart
 
 # اجرای flutter doctor بدون اینکه دنبال dart داخلی بگردد
 RUN flutter doctor -v
