@@ -13,6 +13,9 @@ sudo apt install -y libasound2t64 || sudo apt install -y liboss4-salsa-asound2
 # Register emulators (required if building inside docker)
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
+# ARM64 compatible tools
+wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage -O linuxdeploy
+
 # Make linuxdeploy executable
 chmod +x linuxdeploy
 
