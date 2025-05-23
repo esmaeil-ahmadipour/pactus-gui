@@ -34,12 +34,12 @@ dependencies:
   get_it: ^8.0.2
   go_router: ^14.6.1
   grpc:
-  intl: ^0.19.0
+  intl: ^0.20.2
   pactus_gui_widgetbook:
-#        path: ../pactus-gui-widgetbook
+#      path: ../pactus-gui-widgetbook/
     git:
-      url: https://github.com/pactus-project/pactus-gui-widgetbook.git
-      ref: 077422961ce10b2a8b01d600e7f04b597a7db5ba
+      url: https://github.com/esmaeil-ahmadipour/pactus-gui-widgetbook.git
+      ref: 23b386121dcd11a435ae6fe68fcbbd1c8e176d4f
   path: ^1.8.3
   process_run: ^1.2.2+1
   protobuf:
