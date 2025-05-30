@@ -801,11 +801,11 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "6b3ec10570787805f3b639989b12148483b5cb2e"
-      resolved-ref: "6b3ec10570787805f3b639989b12148483b5cb2e"
+      ref: c657022967bd4739295934aff7e1931c8158b121
+      resolved-ref: c657022967bd4739295934aff7e1931c8158b121
       url: "https://github.com/esmaeil-ahmadipour/pactus-gui-widgetbook.git"
     source: git
-    version: "1.15.0+22"
+    version: "1.16.0+23"
   path:
     dependency: "direct main"
     description:

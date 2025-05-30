@@ -173,7 +173,7 @@ Examples:
 
 ### Code Review Process
 Your PR will go through these checks:
-1. Flutter environment setup (v3.27.3)
+1. Flutter environment setup (v3.32.0)
 2. Dependency installation (`flutter pub get`)
 3. Localization file generation (`flutter gen-l10n`)
 4. Localization file verification

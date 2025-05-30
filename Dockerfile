@@ -45,9 +45,9 @@ RUN dart --version
 RUN which dart
 
 # نصب Flutter بدون اجرای اسکریپت‌های داخلی و استفاده از Dart نصب‌شده
-RUN curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.27.3-stable.tar.xz \
-  && tar xf flutter_linux_3.27.3-stable.tar.xz -C /usr/local \
-  && rm flutter_linux_3.27.3-stable.tar.xz
+RUN curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.32.0-stable.tar.xz \
+  && tar xf flutter_linux_3.32.0-stable.tar.xz -C /usr/local \
+  && rm flutter_linux_3.32.0-stable.tar.xz
 
 ENV PATH="/usr/local/flutter/bin:${PATH}"
 
