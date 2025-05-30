@@ -47,11 +47,12 @@ jobs:
          dart run build_runner build --delete-conflicting-outputs &&
          flutter build linux --release"
 
-#      - name: Set Up Flutter
+#      - name: Set Up Flutter Environment
 #        uses: subosito/flutter-action@v2
 #        with:
 #          flutter-version: '3.32.0'
 #          channel: 'stable'
+#          cache: true
 
       - name: 01 - Install ARM64 Dependencies
         run: bash .github/scripts/linux/arm64-appimage/01-install-dependencies.sh
