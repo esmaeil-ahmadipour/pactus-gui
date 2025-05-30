@@ -36,10 +36,10 @@ dependencies:
   grpc:
   intl: ^0.20.2
   pactus_gui_widgetbook:
-#      path: ../pactus-gui-widgetbook/
+#    path: ../pactus-gui-widgetbook/
     git:
       url: https://github.com/esmaeil-ahmadipour/pactus-gui-widgetbook.git
-      ref: 23b386121dcd11a435ae6fe68fcbbd1c8e176d4f
+      ref: 6b3ec10570787805f3b639989b12148483b5cb2e
   path: ^1.8.3
   process_run: ^1.2.2+1
   protobuf:

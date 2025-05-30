@@ -18,10 +18,10 @@ packages:
     dependency: transitive
     description:
       name: accessibility_tools
-      sha256: "3a36d23e8566f0618730c89b304f4faa5bc843255e26a47ee0ff15df0c30b15d"
+      sha256: aaa782bf794d823f371f45d232efe8605cffe081c34a1d83fe4db491ddbba0c7
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.1"
+    version: "2.6.0"
   analyzer:
     dependency: transitive
     description:
@@ -814,8 +814,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "23b386121dcd11a435ae6fe68fcbbd1c8e176d4f"
-      resolved-ref: "23b386121dcd11a435ae6fe68fcbbd1c8e176d4f"
+      ref: "6b3ec10570787805f3b639989b12148483b5cb2e"
+      resolved-ref: "6b3ec10570787805f3b639989b12148483b5cb2e"
       url: "https://github.com/esmaeil-ahmadipour/pactus-gui-widgetbook.git"
     source: git
     version: "1.15.0+22"
@@ -1420,10 +1420,10 @@ packages:
     dependency: transitive
     description:
       name: widgetbook
-      sha256: fa3603e039d20a00642fd9d70ca2dc8e0cd17785035aaaba683b52bc687e0455
+      sha256: "116efd339f9d060ac4a063f3c1c91266757198bcfb43083fb3f1b7bcbb9e6f75"
       url: "https://pub.dev"
     source: hosted
-    version: "3.14.1"
+    version: "3.14.2"
   widgetbook_annotation:
     dependency: transitive
     description:
@@ -1481,5 +1481,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.7.0-0 <4.0.0"
-  flutter: ">=3.27.0"
+  dart: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
