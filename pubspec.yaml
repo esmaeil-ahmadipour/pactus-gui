@@ -49,12 +49,12 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
+  analyzer: ^7.4.5
   build_runner:
   flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
   json_annotation: ^4.9.0
-  analyzer: ^7.4.5
 
 flutter_gen:
   output: lib/src/core/utils/gen/assets # Optional (default: libf/gen/)
