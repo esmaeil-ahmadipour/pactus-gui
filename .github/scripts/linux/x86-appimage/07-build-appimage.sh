@@ -3,13 +3,6 @@ set -e  # Exit immediately if a command exits with a non-zero status
 
 # Define paths
 APPDIR="AppDir"
-TARGET_NATIVE_RES_DIR="$APPDIR/usr/bin/lib/src/core/native_resources/linux"
-
-# Create target directory for native resources
-mkdir -p "$TARGET_NATIVE_RES_DIR"
-
-# Copy native resource files into the AppDir
-cp -vr ./lib/src/core/native_resources/linux/* "$TARGET_NATIVE_RES_DIR/"
 
 # Create AppRun script directly inside AppDir
 # This script sets an environment variable and launches the binary
