@@ -1,28 +1,5 @@
 name: 'Upload Windows Release Assets'
 description: 'Create a GitHub release, and upload the asset for Windows.'
-runs:
-  using: 'composite'
-
-  steps:
-    - name: Create Windows Release
-      id: create_windows_release
-      uses: softprops/action-gh-release@v2
-      env:
-        GITHUB_TOKEN: ${{ inputs.github_token }}
-      with:
-        tag_name: ${{ inputs.tag_name }}
-        release_name: "${{ inputs.release_name }}"
-        body: "${{ inputs.release_body }}"
-        draft: false
-        prerelease: false
-
-    - name: Upload Windows Release Asset
-      id: upload_windows_release_asset
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ inputs.tag_name }}
-        files: build/windows/x64/runner/Release/${{ inputs.file_name }}
-
 inputs:
   tag_name:
     description: 'The name of the tag'
@@ -39,3 +16,37 @@ inputs:
   file_name:
     description: 'The name of the asset file, that must be uploaded/attached to the release.'
     required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up GitHub CLI
+      uses: cli/cli-action@v2
+      with:
+        github-token: ${{ inputs.github_token }}
+
+    - name: Create Windows Release (if not exists)
+      shell: bash
+      run: |
+        if gh release view "${{ inputs.tag_name }}" > /dev/null 2>&1; then
+          echo "✅ Release '${{ inputs.tag_name }}' already exists. Skipping creation."
+        else
+          echo "📦 Creating release '${{ inputs.tag_name }}'..."
+          gh release create "${{ inputs.tag_name }}" "build/windows/x64/runner/Release/${{ inputs.file_name }}" \
+            --title "${{ inputs.release_name }}" \
+            --notes "${{ inputs.release_body }}"
+        fi
+
+    - name: Upload Windows Release Asset (if not exists)
+      shell: bash
+      run: |
+        ASSET_NAME="${{ inputs.file_name }}"
+        TAG_NAME="${{ inputs.tag_name }}"
+        FILE_PATH="build/windows/x64/runner/Release/$ASSET_NAME"
+
+        if gh release view "$TAG_NAME" --json assets -q ".assets[].name" | grep -q "$ASSET_NAME"; then
+          echo "✅ Asset '$ASSET_NAME' already exists. Skipping upload."
+        else
+          echo "⬆️ Uploading asset '$ASSET_NAME'..."
+          gh release upload "$TAG_NAME" "$FILE_PATH"
+        fi
