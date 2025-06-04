@@ -22,16 +22,24 @@ jobs:
             arm64v8/ubuntu:22.04 \
             bash -c '
               set -e
+          
               apt update && apt install -y \
                 curl git unzip build-essential libgtk-3-dev \
-                libfuse2 fuse squashfs-tools ca-certificates gnupg \
-                && curl -s https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.1-stable.tar.xz | tar xfJ - \
-                && git config --global --add safe.directory /app/flutter \
-                && export PATH="$PATH:/app/flutter/bin" \
-                && flutter precache --linux --arm64 \
-                && flutter doctor \
-                && flutter pub get \
-                && ./scripts/build-linux-appimage.sh
+                libfuse2 fuse squashfs-tools ca-certificates gnupg xz-utils
+          
+              curl -s https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.1-stable.tar.xz -o flutter.tar.xz
+              tar -xf flutter.tar.xz
+              export PATH="$PATH:/app/flutter/bin"
+          
+              git config --global --add safe.directory /app/flutter
+          
+              flutter precache --linux --arm64
+              flutter doctor -v
+          
+              cd /app
+              flutter pub get
+          
+              ./scripts/build-linux-appimage.sh
             '
 
 
