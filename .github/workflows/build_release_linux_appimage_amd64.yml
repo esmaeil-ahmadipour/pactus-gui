@@ -64,7 +64,7 @@ jobs:
         id: tag_data
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
-          FILE_NAME="pactus_gui-${TAG_NAME}-${ARCHITECT}.AppImage"
+          FILE_NAME="linux-build-appimage-${ARCHITECT}-${TAG_NAME}.AppImage"
           TAG_MESSAGE=$(git tag -l --format='%(contents)' "$TAG_NAME" || echo "No release notes")
       
           # Escape for GitHub Actions output
