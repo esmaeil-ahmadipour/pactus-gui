@@ -18,18 +18,18 @@ jobs:
       - name: Build AppImage in ARM64 Docker
         run: |
           docker run --rm --platform linux/arm64 \
-            -v "$(pwd)":/app -w /app \
+            -v $(pwd):/app -w /app \
             arm64v8/ubuntu:22.04 \
             bash -c '
-              apt update && \
-              DEBIAN_FRONTEND=noninteractive apt install -y curl git unzip build-essential libgtk-3-dev \
-              libfuse2 fuse squashfs-tools && \
-              curl -s https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.1-stable.tar.xz | tar xfJ - && \
-              export PATH=$PATH:/app/flutter/bin && \
-              flutter doctor -v && \
-              flutter pub get && \
-              chmod +x ./scripts/build-linux-appimage.sh && \
-              ./scripts/build-linux-appimage.sh
+              apt update && apt install -y curl git unzip build-essential libgtk-3-dev \
+                libfuse2 fuse squashfs-tools \
+                && curl -s https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.0-stable.tar.xz | tar xfJ - \
+                && git config --global --add safe.directory /app/flutter \
+                && export PATH=$PATH:/app/flutter/bin \
+                && flutter precache --flutter-tools \
+                && flutter doctor -v \
+                && flutter pub get \
+                && ./scripts/build-linux-appimage.sh
             '
 
       - name: Upload ARM64 AppImage to GitHub Release
