@@ -1,82 +1,124 @@
-name: Linux Release Build (ARM64)
-
-# Add environment variables at the top level
-env:
-  LINUX_ASSETS_URL: "https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_linux_arm64.tar.gz"
-
-permissions:
-  contents: write
+name: Linux ARM64 AppImage Build & Release
 
 on:
   push:
     tags:
-      - 'v*' # Trigger on version tags like v1.2.3
+      - 'v*'
+
+env:
+  LINUX_ASSETS_URL: "https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_linux_arm64.tar.gz"
+  ARCHITECT: "arm64"
+
+permissions:
+  contents: write
+
+#jobs:
+#  build-and-release-linux-arm64:
+#    outputs:
+#      tag_name: ${{ steps.tag_data.outputs.tag_name }}
+#      release_link: ${{ steps.prepare_links.outputs.release_link }}
+#      download_link: ${{ steps.prepare_links.outputs.download_link }}
+
 
 jobs:
   build-and-release-linux-arm64:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-22.04
     outputs:
-      tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
-      release_body: ${{ steps.get_tag_details.outputs.release_body }}
-      file_name: ${{ steps.prepared_artifact_file.outputs.file_name }}
-      download_link: ${{ steps.prepare_download_links.outputs.download_link }}
-      release_link: ${{ steps.prepare_download_links.outputs.release_link }}
+      tag_name: ${{ steps.tag_data.outputs.tag_name }}
+      release_link: ${{ steps.prepare_links.outputs.release_link }}
+      download_link: ${{ steps.prepare_links.outputs.download_link }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Build Linux ARM64 Artifacts
-        uses: ./.github/actions/linux/build-artifacts-arm64
+      - name: Set up QEMU for ARM64 emulation
+        uses: docker/setup-qemu-action@v2
 
-      - name: Prepare Tag Metadata
-        id: get_tag_details
-        uses: ./.github/actions/utils/extract-tag-metadata
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and run Flutter build inside ARM64 container
+        run: |
+          docker build --platform linux/arm64 -t my-flutter-arm64 .
+          docker run --rm -v $PWD:/app my-flutter-arm64 bash -c "
+          flutter pub get &&
+          flutter gen-l10n --output-dir=lib/l10n --arb-dir=lib/l10n &&
+          dart run build_runner build --delete-conflicting-outputs &&
+          flutter build linux --release"
+
+      #      - name: Set Up Flutter Environment
+      #        uses: subosito/flutter-action@v2
+      #        with:
+      #          flutter-version: '3.32.0'
+      #          channel: 'stable'
+      #          cache: true
+
+      - name: 01 - Install ARM64 Dependencies
+        run: bash .github/scripts/linux/arm64-appimage/01-install-dependencies.sh
+
+      - name: 02 - Install Flutter Project Dependencies
+        run: bash .github/scripts/linux/arm64-appimage/02-install-flutter-deps.sh
+
+      - name: 03 - Build Flutter Linux Bundle (ARM64)
+        run: bash .github/scripts/linux/arm64-appimage/03-build.sh
+
+      - name: 04 - Extract ARM64 Daemon Files
+        run: bash .github/scripts/linux/arm64-appimage/04-extract-daemon-files.sh
+
+      - name: 05 - Prepare AppDir (ARM64)
+        run: bash .github/scripts/linux/arm64-appimage/05-prepare-appdir.sh
+
+      - name: 06 - Download ARM64 AppImage Tools
+        run: bash .github/scripts/linux/arm64-appimage/06-download-tools.sh
+
+      - name: 07 - Build ARM64 AppImage
+        run: bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh
+
+      - name: 08 - Test ARM64 AppImage
+        run: bash .github/scripts/linux/arm64-appimage/08-test.sh
+
+      - name: Upload Built AppImage
+        uses: actions/upload-artifact@v4
         with:
-          github_ref: ${{ github.ref }}
+          name: PactusGUI-ARM64-AppImage
+          path: ./*.AppImage
 
-      - name: Move Build Files To Artifacts
-        uses: ./.github/actions/utils/move-files-to-artifacts
+      - name: Get Tag Data
+        id: tag_data
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          FILE_NAME="pactus_gui-${TAG_NAME}-arm64.AppImage"
+          echo "file_name=${FILE_NAME}" >> $GITHUB_OUTPUT
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Add Daemon Files To Artifacts
-        id: prepared_artifact_file
-        uses: ./.github/actions/linux/add-daemon-files
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
-          arch: arm64 # The CPU architecture (e.g., arm64, x64)
+          tag_name: ${{ steps.tag_data.outputs.tag_name }}
+          name: "Release ${{ steps.tag_data.outputs.tag_name }}"
+          files: ${{ steps.tag_data.outputs.file_name }}
+          draft: false
+          prerelease: false
 
-      - name: Upload Linux Release Assets
-        uses: ./.github/actions/linux/release
-        with:
-          tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
-          release_name: ${{ steps.get_tag_details.outputs.tag_name }}
-          release_body: ${{ steps.get_tag_details.outputs.release_body }}
-          file_name: ${{ steps.prepared_artifact_file.outputs.file_name }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          arch: arm64 # The CPU architecture (e.g., arm64, x64)
+      - name: Prepare Download Links
+        id: prepare_links
+        run: |
+          echo "download_link=https://github.com/${{ github.repository }}/releases/download/${{ steps.tag_data.outputs.tag_name }}/${{ steps.tag_data.outputs.file_name }}" >> $GITHUB_OUTPUT
+          echo "release_link=https://github.com/${{ github.repository }}/releases/tag/${{ steps.tag_data.outputs.tag_name }}" >> $GITHUB_OUTPUT
 
-      - name: Generate Release Download Links
-        id: prepare_download_links
-        uses: ./.github/actions/utils/generate-download-links
-        with:
-          tag_name: ${{ steps.get_tag_details.outputs.tag_name }}
-          file_name: ${{ steps.prepared_artifact_file.outputs.file_name }}
-
-  notify-linux:
+  notify-arm64:
     needs: build-and-release-linux-arm64
     runs-on: ubuntu-latest
     steps:
-      - name: Send Discord Notification
+      - name: Notify Discord
         uses: Ilshidur/action-discord@master
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
           args: |
-            🚀 **GUI Release:** ${{ needs.build-and-release-linux-arm64.outputs.tag_name }}   📥[Download Linux-arm64 Version](${{ needs.build-and-release-linux-arm64.outputs.download_link }})
-
-      - name: Send Slack Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_MESSAGE: |
-            🚀 **GUI Release:** ${{ needs.build-and-release-linux-arm64.outputs.tag_name }}      📥[Download Linux-arm64 Version](${{ needs.build-and-release-linux-arm64.outputs.download_link }})
+            🚀 **New ARM64 Linux Release** 
+            **Version:** ${{ needs.build-and-release-linux-arm64.outputs.tag_name }}
+            **Download:** [AppImage](${{ needs.build-and-release-linux-arm64.outputs.download_link }})
