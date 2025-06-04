@@ -29,8 +29,8 @@ chmod +x "$APPDIR/AppRun"
 
 # Dynamic version and architecture naming
 TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "untagged")
-ARCH="x86_64"
-FILE_NAME="pactus_gui-${TAG}-${ARCH}.AppImage"
+ARCH="x64"
+FILE_NAME="linux-build-appimage-${ARCH}-${TAG}.AppImage"
 
 # Rename and ensure the AppImage is executable
 mv ./*.AppImage "$FILE_NAME"
