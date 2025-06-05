@@ -98,7 +98,7 @@ jobs:
           echo "release_link=${RELEASE_LINK}" >> $GITHUB_OUTPUT
 
   notify-linux:
-    needs: build-and-release-linux-amd64
+    needs: build-and-release-linux-arm64
     runs-on: ubuntu-latest
     steps:
       - name: Send Discord Notification
@@ -108,15 +108,15 @@ jobs:
         with:
           args: |
             🚀 **New Linux Release Available** 
-            **Version:** ${{ needs.build-and-release-linux-amd64.outputs.tag_name }}
-            **Download:** [AppImage](${{ needs.build-and-release-linux-amd64.outputs.download_link }})
-            **Release Notes:** ${{ needs.build-and-release-linux-amd64.outputs.release_link }}
+            **Version:** ${{ needs.build-and-release-linux-arm64.outputs.tag_name }}
+            **Download:** [AppImage](${{ needs.build-and-release-linux-arm64.outputs.download_link }})
+            **Release Notes:** ${{ needs.build-and-release-linux-arm64.outputs.release_link }}
 
       - name: Send Slack Notification
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_MESSAGE: |
-            :rocket: *Pactus GUI ${{ needs.build-and-release-linux-amd64.outputs.tag_name }} - Linux*
-            • Download: <${{ needs.build-and-release-linux-amd64.outputs.download_link }}|AppImage>
-            • Release: <${{ needs.build-and-release-linux-amd64.outputs.release_link }}|View details>
+            :rocket: *Pactus GUI ${{ needs.build-and-release-linux-arm64.outputs.tag_name }} - Linux*
+            • Download: <${{ needs.build-and-release-linux-arm64.outputs.download_link }}|AppImage>
+            • Release: <${{ needs.build-and-release-linux-arm64.outputs.release_link }}|View details>
