@@ -7,9 +7,6 @@ apt-get update
 #sudo
 apt-get install -y qemu-user-static
 
-# Register ARM64 binary format
-docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-
 # Make linuxdeploy executable
 chmod +x linuxdeploy
 
