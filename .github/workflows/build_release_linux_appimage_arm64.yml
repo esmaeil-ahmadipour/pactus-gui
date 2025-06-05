@@ -19,7 +19,7 @@ jobs:
       release_link: ${{ steps.prepare_links.outputs.release_link }}
       download_link: ${{ steps.prepare_links.outputs.download_link }}
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
