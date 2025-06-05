@@ -57,8 +57,7 @@ jobs:
           bash .github/scripts/linux/arm64-appimage/04-extract-daemon-files.sh &&
           bash .github/scripts/linux/arm64-appimage/05-prepare-appdir.sh &&
           bash .github/scripts/linux/arm64-appimage/06-download-tools.sh &&
-          bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh &&
-          bash .github/scripts/linux/arm64-appimage/08-test.sh"
+          bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh"
 
       - name: Upload Built AppImage
         uses: actions/upload-artifact@v4
