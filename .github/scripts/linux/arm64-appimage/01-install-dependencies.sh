@@ -14,9 +14,7 @@ apt install -y \
 # Handle audio library (libasound2) compatibility
 echo "🎵 Installing libasound2 or fallback alternative..."
 #sudo
-apt install -y libasound2t64
-#sudo
- apt install -y liboss4-salsa-asound2
+apt install -y libasound2 || apt install -y liboss4-salsa-asound2
 
 # Ensure qemu-aarch64 is available via symlink
 if ! command -v qemu-aarch64 &> /dev/null && command -v qemu-aarch64-static &> /dev/null; then
