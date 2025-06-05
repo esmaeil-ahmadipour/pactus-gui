@@ -1,4 +1,4 @@
-name: Linux arm64 AppImage Build & Release
+name: Linux ubuntu-24.04-arm AppImage Build & Release
 
 on:
   push:
@@ -24,11 +24,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set Up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.32.0'
-          channel: 'stable'
+      - name: Install Dart and Flutter (non-root)
+        run: |
+          # مسیر نصب در دایرکتوری پروژه
+          mkdir -p $HOME/flutter-sdk
+          mkdir -p $HOME/dart-sdk
+          
+          # نصب Dart SDK
+          wget https://storage.googleapis.com/dart-archive/channels/stable/release/latest/sdk/dartsdk-linux-arm64-release.zip -O dart-sdk.zip
+          unzip dart-sdk.zip -d $HOME/dart-sdk
+          rm dart-sdk.zip
+          echo "$HOME/dart-sdk/dart-sdk/bin" >> $GITHUB_PATH
+          
+          # نصب Flutter SDK
+          curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.32.0-stable.tar.xz
+          tar xf flutter_linux_3.32.0-stable.tar.xz -C $HOME/flutter-sdk
+          rm flutter_linux_3.32.0-stable.tar.xz
+          echo "$HOME/flutter-sdk/flutter/bin" >> $GITHUB_PATH
+          
+          # جلوگیری از خطای Git مربوط به safe directory
+          git config --global --add safe.directory "$HOME/flutter-sdk/flutter"
+          
+          # حذف cache برای اطمینان از نصب تمیز
+          rm -rf "$HOME/flutter-sdk/flutter/bin/cache"
+          
+          # بررسی نصب
+          dart --version
+          flutter doctor -v
 
       - name: 01 - Install Dependencies
         run: bash .github/scripts/linux/x86-appimage/01-install-dependencies.sh
