@@ -10,6 +10,9 @@ sudo apt install -y libfuse2 build-essential patchelf wget zsync squashfs-tools 
 # Replace problematic libasound2 with real provider
 sudo apt install -y libasound2t64 || sudo apt install -y liboss4-salsa-asound2
 
+sudo apt-get install -y qemu-user-static
+
+
 # Register emulators (required if building inside docker)
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
@@ -21,3 +24,5 @@ chmod +x linuxdeploy
 
 # Run with QEMU (assuming linuxdeploy is ARM64 binary)
 qemu-aarch64 ./linuxdeploy --appdir AppDir ...
+qemu-aarch64-static ./linuxdeploy --appdir AppDir ...
+which qemu-aarch64 || echo "qemu-aarch64 not found"
