@@ -2,7 +2,6 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-
 # نصب پیش‌نیازها
 RUN apt-get update && apt-get install -y \
   curl \
@@ -19,6 +18,7 @@ RUN apt-get update && apt-get install -y \
   libasound2 \
   libx11-dev \
   libssl-dev \
+  fuse \
   wget \
   squashfs-tools \
   patchelf \
