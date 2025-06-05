@@ -48,29 +48,41 @@ jobs:
 
       - name: Build and run Flutter build inside ARM64 container
         run: |
+          mkdir -p output
           docker build --platform linux/arm64 -t my-flutter-arm64 .
-          docker run --rm -v $PWD:/app my-flutter-arm64 bash -c "
-          chmod +x .github/scripts/linux/arm64-appimage/*.sh &&
-          bash .github/scripts/linux/arm64-appimage/01-install-dependencies.sh &&
-          bash .github/scripts/linux/arm64-appimage/02-install-flutter-deps.sh &&
-          bash .github/scripts/linux/arm64-appimage/03-build.sh &&
-          bash .github/scripts/linux/arm64-appimage/04-extract-daemon-files.sh &&
-          bash .github/scripts/linux/arm64-appimage/05-prepare-appdir.sh &&
-          bash .github/scripts/linux/arm64-appimage/06-download-tools.sh &&
-          bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh"
+          docker run --rm \
+            -v $PWD:/app \
+            -v $PWD/output:/output \
+            my-flutter-arm64 \
+            bash -c "
+              chmod +x .github/scripts/linux/arm64-appimage/*.sh &&
+              bash .github/scripts/linux/arm64-appimage/01-install-dependencies.sh &&
+              bash .github/scripts/linux/arm64-appimage/02-install-flutter-deps.sh &&
+              bash .github/scripts/linux/arm64-appimage/03-build.sh &&
+              bash .github/scripts/linux/arm64-appimage/04-extract-daemon-files.sh &&
+              bash .github/scripts/linux/arm64-appimage/05-prepare-appdir.sh &&
+              bash .github/scripts/linux/arm64-appimage/06-download-tools.sh &&
+              bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh"
 
-      - name: Upload ARM64 AppImage
+
+      - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pactus-arm64-appimage
-          path: pactus_gui-*-arm64.AppImage
+          name: pactus-gui-appimage-arm64
+          path: output/*
 
-
-      - name: Upload Built AppImage
-        uses: actions/upload-artifact@v4
-        with:
-          name: PactusGUI-ARM64-AppImage
-          path: ./*.AppImage
+#      - name: Upload ARM64 AppImage
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: pactus-arm64-appimage
+#          path: pactus_gui-*-arm64.AppImage
+#
+#
+#      - name: Upload Built AppImage
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: PactusGUI-ARM64-AppImage
+#          path: ./*.AppImage
 
       - name: Get Tag Data
         id: tag_data

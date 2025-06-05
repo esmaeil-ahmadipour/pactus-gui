@@ -31,6 +31,8 @@ RUN apt-get update && apt-get install -y \
   g++ \
   clang \
   clangd \
+  qemu-user-static \
+  tree \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # نصب Dart SDK
@@ -40,10 +42,6 @@ RUN wget https://storage.googleapis.com/dart-archive/channels/stable/release/lat
 
 ENV PATH="/usr/local/dart-sdk/bin:${PATH}"
 
-# تأیید نصب Dart
-RUN dart --version
-RUN which dart
-
 # نصب Flutter بدون اجرای اسکریپت‌های داخلی و استفاده از Dart نصب‌شده
 RUN curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.32.0-stable.tar.xz \
   && tar xf flutter_linux_3.32.0-stable.tar.xz -C /usr/local \
@@ -51,14 +49,18 @@ RUN curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stabl
 
 ENV PATH="/usr/local/flutter/bin:${PATH}"
 
-# جلوگیری از خطای git "dubious ownership"
+# Git config برای جلوگیری از ارور
 RUN git config --global --add safe.directory /usr/local/flutter
 
-# پاکسازی cache قبلی Flutter و عدم reliance روی Dart داخلی
+# پاکسازی cache
 RUN rm -rf /usr/local/flutter/bin/cache
 
-# اجرای flutter doctor
-RUN flutter doctor -v
+# تأیید نصب‌ها
+RUN dart --version && flutter doctor -v && tree /usr/local/flutter
 
+# مسیر کد
 WORKDIR /app
 COPY . /app
+
+# مسیر خروجی
+VOLUME ["/output"]

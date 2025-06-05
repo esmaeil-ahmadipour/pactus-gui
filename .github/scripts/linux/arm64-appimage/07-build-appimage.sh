@@ -1,48 +1,40 @@
 #!/bin/bash
 set -e
 
-echo "🔍 Current directory: $(pwd)"
-echo "📦 Installing debugging tools..."
-apt-get update && apt-get install -y qemu-user-static tree
+echo "🔧 ساخت AppImage آغاز شد..."
 
-echo "📁 Tree view:"
-tree -a -L 3 || echo "⚠️ tree failed or too deep"
+chmod +x ./linuxdeploy
 
-echo "📂 Checking AppDir..."
-if [ ! -d "AppDir" ]; then
-  echo "❌ AppDir missing!"
-  exit 1
-fi
-
-echo "📑 Checking .desktop and .png..."
-if [ ! -f "AppDir/pactus_gui.desktop" ]; then
-  echo "❌ Missing pactus_gui.desktop"
-  exit 1
-fi
-
-if [ ! -f "AppDir/pactus_gui.png" ]; then
-  echo "❌ Missing pactus_gui.png"
-  exit 1
-fi
-
-echo "🔧 Making linuxdeploy executable..."
-chmod +x linuxdeploy
-
-echo "🚀 Running linuxdeploy..."
+# اجرای linuxdeploy از طریق QEMU
+echo "🚀 اجرای linuxdeploy از طریق QEMU..."
 qemu-aarch64 -L /usr/aarch64-linux-gnu ./linuxdeploy \
   --appdir AppDir \
   --desktop-file AppDir/pactus_gui.desktop \
   --icon-file AppDir/pactus_gui.png \
-  --output appimage
+  --output appimage || true
 
-TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "untagged")
-APPIMAGE_FILE="pactus_gui-${TAG}-arm64.AppImage"
+# بررسی خروجی AppImage
+if ls ./*.AppImage 1> /dev/null 2>&1; then
+  TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "untagged")
+  FILENAME="pactus_gui-${TAG}-arm64.AppImage"
+  mv ./*.AppImage "$FILENAME"
+  echo "✅ AppImage ساخته شد: $FILENAME"
+  cp "$FILENAME" /output/
+else
+  echo "⚠️ AppImage با FUSE ساخته نشد، استفاده از --appimage-extract..."
+  qemu-aarch64 -L /usr/aarch64-linux-gnu ./linuxdeploy \
+    --appdir AppDir \
+    --desktop-file AppDir/pactus_gui.desktop \
+    --icon-file AppDir/pactus_gui.png \
+    --output appimage --appimage-extract
 
-echo "📦 Renaming AppImage to: $APPIMAGE_FILE"
-mv ./*.AppImage "$APPIMAGE_FILE"
+  mkdir -p /output/extracted
+  cp -r squashfs-root/* /output/extracted/
+  echo "📦 محتویات AppImage در /output/extracted کپی شد"
+fi
 
-# اطمینان از اینکه فایل خارج داکر هم قابل دسترسه
-echo "📤 AppImage should now be available outside Docker under: $APPIMAGE_FILE"
+echo "✅ فرآیند ساخت AppImage تمام شد"
+
 
 
 ##!/bin/bash
