@@ -50,34 +50,15 @@ jobs:
         run: |
           docker build --platform linux/arm64 -t my-flutter-arm64 .
           docker run --rm -v $PWD:/app my-flutter-arm64 bash -c "
-          flutter pub get &&
-          flutter gen-l10n --output-dir=lib/l10n --arb-dir=lib/l10n &&
-          dart run build_runner build --delete-conflicting-outputs &&
-          flutter build linux --release"
-
-      - name: 01 - Install ARM64 Dependencies
-        run: bash .github/scripts/linux/arm64-appimage/01-install-dependencies.sh
-
-      - name: 02 - Install Flutter Project Dependencies
-        run: bash .github/scripts/linux/arm64-appimage/02-install-flutter-deps.sh
-
-      - name: 03 - Build Flutter Linux Bundle (ARM64)
-        run: bash .github/scripts/linux/arm64-appimage/03-build.sh
-
-      - name: 04 - Extract ARM64 Daemon Files
-        run: bash .github/scripts/linux/arm64-appimage/04-extract-daemon-files.sh
-
-      - name: 05 - Prepare AppDir (ARM64)
-        run: bash .github/scripts/linux/arm64-appimage/05-prepare-appdir.sh
-
-      - name: 06 - Download ARM64 AppImage Tools
-        run: bash .github/scripts/linux/arm64-appimage/06-download-tools.sh
-
-      - name: 07 - Build ARM64 AppImage
-        run: bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh
-
-      - name: 08 - Test ARM64 AppImage
-        run: bash .github/scripts/linux/arm64-appimage/08-test.sh
+          chmod +x .github/scripts/linux/arm64-appimage/*.sh &&
+          bash .github/scripts/linux/arm64-appimage/01-install-dependencies.sh &&
+          bash .github/scripts/linux/arm64-appimage/02-install-flutter-deps.sh &&
+          bash .github/scripts/linux/arm64-appimage/03-build.sh &&
+          bash .github/scripts/linux/arm64-appimage/04-extract-daemon-files.sh &&
+          bash .github/scripts/linux/arm64-appimage/05-prepare-appdir.sh &&
+          bash .github/scripts/linux/arm64-appimage/06-download-tools.sh &&
+          bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh &&
+          bash .github/scripts/linux/arm64-appimage/08-test.sh"
 
       - name: Upload Built AppImage
         uses: actions/upload-artifact@v4
