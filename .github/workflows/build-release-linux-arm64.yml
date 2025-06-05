@@ -59,6 +59,13 @@ jobs:
           bash .github/scripts/linux/arm64-appimage/06-download-tools.sh &&
           bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh"
 
+      - name: Upload ARM64 AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: pactus-arm64-appimage
+          path: pactus_gui-*-arm64.AppImage
+
+
       - name: Upload Built AppImage
         uses: actions/upload-artifact@v4
         with:
