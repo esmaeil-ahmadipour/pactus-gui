@@ -1,28 +1,37 @@
 #!/bin/bash
 set -e
 
+echo "🔧 Updating system and installing dependencies..."
 sudo apt update
 
-sudo apt install -y libfuse2 build-essential patchelf wget zsync squashfs-tools \
+sudo apt install -y \
+  libfuse2 build-essential patchelf wget zsync squashfs-tools \
   libgtk-3-dev libglib2.0-dev libnss3 libxss1 libx11-dev \
   tar gzip libssl-dev unzip qemu-user-static cmake ninja-build clang
 
-# Replace problematic libasound2 with real provider
+# Handle audio library (libasound2) compatibility
+echo "🎵 Installing libasound2 or fallback alternative..."
 sudo apt install -y libasound2t64 || sudo apt install -y liboss4-salsa-asound2
 
-sudo apt-get install -y qemu-user-static
+# Ensure qemu-aarch64 is available via symlink
+if ! command -v qemu-aarch64 &> /dev/null && command -v qemu-aarch64-static &> /dev/null; then
+  echo "🔗 Linking qemu-aarch64-static to qemu-aarch64"
+  sudo ln -s /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64
+fi
 
+# Confirm qemu is available
+echo "✅ Using QEMU binary at: $(which qemu-aarch64)"
 
-# Register emulators (required if building inside docker)
-docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-
-# ARM64 compatible tools
+# Download ARM64-compatible linuxdeploy
+echo "⬇️ Downloading linuxdeploy for ARM64..."
 wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-aarch64.AppImage -O linuxdeploy
 
-# Make linuxdeploy executable
 chmod +x linuxdeploy
+echo "✅ linuxdeploy downloaded and made executable."
 
-# Run with QEMU (assuming linuxdeploy is ARM64 binary)
-qemu-aarch64 ./linuxdeploy --appdir AppDir ...
-qemu-aarch64-static ./linuxdeploy --appdir AppDir ...
-which qemu-aarch64 || echo "qemu-aarch64 not found"
+# Test execution through QEMU
+echo "🧪 Testing linuxdeploy via qemu-aarch64..."
+qemu-aarch64 ./linuxdeploy --appimage-extract || {
+  echo "❌ Failed to execute linuxdeploy via QEMU."
+  exit 1
+}
