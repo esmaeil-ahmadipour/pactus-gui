@@ -2,21 +2,27 @@
 set -e
 
 echo "🔧 Updating system and installing dependencies..."
-sudo apt update
+#sudo
+apt update
 
-sudo apt install -y \
+#sudo
+apt install -y \
   libfuse2 build-essential patchelf wget zsync squashfs-tools \
   libgtk-3-dev libglib2.0-dev libnss3 libxss1 libx11-dev \
   tar gzip libssl-dev unzip qemu-user-static cmake ninja-build clang
 
 # Handle audio library (libasound2) compatibility
 echo "🎵 Installing libasound2 or fallback alternative..."
-sudo apt install -y libasound2t64 || sudo apt install -y liboss4-salsa-asound2
+#sudo
+apt install -y libasound2t64
+#sudo
+ apt install -y liboss4-salsa-asound2
 
 # Ensure qemu-aarch64 is available via symlink
 if ! command -v qemu-aarch64 &> /dev/null && command -v qemu-aarch64-static &> /dev/null; then
   echo "🔗 Linking qemu-aarch64-static to qemu-aarch64"
-  sudo ln -s /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64
+  #sudo
+  ln -s /usr/bin/qemu-aarch64-static /usr/bin/qemu-aarch64
 fi
 
 # Confirm qemu is available

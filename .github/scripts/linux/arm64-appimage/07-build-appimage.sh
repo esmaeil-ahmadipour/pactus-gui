@@ -2,7 +2,10 @@
 set -e
 
 # Install QEMU for ARM64 emulation
-sudo apt-get update && sudo apt-get install -y qemu-user-static
+#sudo
+apt-get update
+#sudo
+apt-get install -y qemu-user-static
 
 # Register ARM64 binary format
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
