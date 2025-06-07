@@ -24,22 +24,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Cache Flutter SDK
-        uses: actions/cache@v3
-        with:
-          path: ~/.flutter
-          key: flutter-${{ runner.os }}-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            flutter-${{ runner.os }}-
-
-      - name: Cache Pub packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.pub-cache
-          key: pub-${{ runner.os }}-${{ hashFiles('**/pubspec.yaml') }}
-          restore-keys: |
-            pub-${{ runner.os }}-
-
       - name: Set up QEMU for ARM64 emulation
         uses: docker/setup-qemu-action@v2
 
@@ -55,6 +39,7 @@ jobs:
             -v $PWD/output:/output \
             my-flutter-arm64 \
             bash -c "
+              export APPIMAGE_EXTRACT_AND_RUN=1 &&
               chmod +x .github/scripts/linux/arm64-appimage/*.sh &&
               bash .github/scripts/linux/arm64-appimage/01-install-dependencies.sh &&
               bash .github/scripts/linux/arm64-appimage/02-install-flutter-deps.sh &&
@@ -64,25 +49,11 @@ jobs:
               bash .github/scripts/linux/arm64-appimage/06-download-tools.sh &&
               bash .github/scripts/linux/arm64-appimage/07-build-appimage.sh"
 
-
       - name: Upload AppImage artifact
         uses: actions/upload-artifact@v4
         with:
           name: pactus-gui-appimage-arm64
           path: output/*
-
-#      - name: Upload ARM64 AppImage
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: pactus-arm64-appimage
-#          path: pactus_gui-*-arm64.AppImage
-#
-#
-#      - name: Upload Built AppImage
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: PactusGUI-ARM64-AppImage
-#          path: ./*.AppImage
 
       - name: Get Tag Data
         id: tag_data
@@ -119,6 +90,6 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         with:
           args: |
-            🚀 **New ARM64 Linux Release** 
-            **Version:** ${{ needs.build-and-release-linux-arm64.outputs.tag_name }}
+            🚀 **New ARM64 Linux Release**  
+            **Version:** ${{ needs.build-and-release-linux-arm64.outputs.tag_name }}  
             **Download:** [AppImage](${{ needs.build-and-release-linux-arm64.outputs.download_link }})
