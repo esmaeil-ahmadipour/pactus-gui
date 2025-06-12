@@ -73,6 +73,7 @@ package_release_zip() {
   # Copy to root artifacts directory
   mkdir -p "$ROOT_OUTPUT_DIR"
   cp -v "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
+  cp -v "$ZIP_PATH" "$BUILD_DIR/"
 
   echo "📤 ZIP file copied to artifacts directory: $ROOT_OUTPUT_DIR/"
 }
