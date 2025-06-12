@@ -56,9 +56,10 @@ jobs:
           choco install -y curl --no-progress
           choco install -y unzip --no-progress
 
-      - name: Run build and release script
+      - name: Run build and release script (Windows)
+        run: |
+          bash .github/scripts/build_and_package_windows_amd64_zip.sh ${{ github.ref_name }}
         shell: bash
-        run: .github/scripts/build_and_package_windows_amd64_zip.sh ${{ github.ref_name }}
 
       - name: Upload build ${{ env.FILE_TYPE }} file to GitHub Release
         uses: softprops/action-gh-release@v2

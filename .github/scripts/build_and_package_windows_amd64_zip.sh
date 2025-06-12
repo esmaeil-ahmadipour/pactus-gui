@@ -2,36 +2,25 @@
 set -euo pipefail
 
 # ------------------------
-# ENVIRONMENT (تنظیمات)
+# ENV VARS
 # ------------------------
-
-export FLUTTER_VERSION="3.32.0"
-export TARGET_OS="windows"
-export ARCH="amd64"
-export FILE_TYPE="zip"
-
+FLUTTER_VERSION="3.32.0"
+ARCH="amd64"
 TAG_NAME="${1:-local}"
-
-BUILD_DIR="$(pwd)/build/windows/x64/runner/Release"
-OUTPUT_DIR="$(pwd)/artifacts/windows/${ARCH}/release"
+BUILD_DIR="$(pwd)/build/windows/${ARCH}/release/bundle"
+OUTPUT_DIR="$(pwd)/artifacts/windows/${ARCH}/release/bundle"
 ROOT_OUTPUT_DIR="$(pwd)/artifacts"
-OUTPUT_NAME="PactusGUI-${TAG_NAME}-${TARGET_OS}-${ARCH}.${FILE_TYPE}"
-
+OUTPUT_NAME="PactusGUI-${TAG_NAME}-windows-${ARCH}.zip"
 PACTUS_CLI_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_windows_amd64.zip"
-FINAL_CLI_DEST="${BUILD_DIR}/data/flutter_assets/lib/src/core/native_resources/windows"
+FINAL_CLI_DEST="${BUILD_DIR}/data/flutter_assets/assets/native_resources/windows"
 
 # ------------------------
-# FUNCTIONS
+# FUNCTION
 # ------------------------
 
-install_dependencies() {
-  echo "🔧 Installing dependencies (zip, curl)..."
-  choco install zip curl -y || true
-}
-
-clone_flutter() {
-  echo "⬇️ Cloning Flutter $FLUTTER_VERSION ..."
-  git clone https://github.com/flutter/flutter.git --branch $FLUTTER_VERSION --depth 1
+install_flutter() {
+  echo "🔽 Cloning Flutter $FLUTTER_VERSION..."
+  git clone https://github.com/flutter/flutter.git --branch "$FLUTTER_VERSION" --depth 1
   export PATH="$PWD/flutter/bin:$PATH"
   flutter doctor -v
   flutter config --enable-windows-desktop
@@ -46,7 +35,7 @@ build_flutter_windows() {
 
 download_and_extract_pactus_cli() {
   echo "⬇️ Downloading pactus-cli..."
-  curl -L -o pactus-cli.zip "$PACTUS_CLI_URL"
+  curl -sSL "$PACTUS_CLI_URL" -o pactus-cli.zip
 
   echo "📦 Extracting pactus-cli to ${FINAL_CLI_DEST}..."
   mkdir -p "$FINAL_CLI_DEST"
@@ -71,9 +60,7 @@ package_release_zip() {
 # ------------------------
 # MAIN
 # ------------------------
-
-install_dependencies
-clone_flutter
+install_flutter
 build_flutter_windows
 download_and_extract_pactus_cli
 package_release_zip
