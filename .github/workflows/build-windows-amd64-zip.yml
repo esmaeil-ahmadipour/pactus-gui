@@ -37,8 +37,10 @@ jobs:
           flutter precache --windows
 
       - name: Run build and release script
+        shell: pwsh
         run: |
-          powershell -Command "& { Set-ExecutionPolicy Bypass -Scope Process -Force; ./github/scripts/build_and_package_windows_amd64_zip.ps1 ${{ github.ref_name }} }"
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          .\.github\scripts\build_and_package_windows_amd64_zip.ps1 ${{ github.ref_name }}
 
       - name: Upload build ${{ env.FILE_TYPE }} file to GitHub Release
         uses: softprops/action-gh-release@v2
