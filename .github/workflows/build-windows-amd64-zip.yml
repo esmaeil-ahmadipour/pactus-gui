@@ -25,22 +25,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Flutter ${{ env.FLUTTER_VERSION }}
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-
-      - name: Configure Flutter for Windows
+      - name: Run build and release script
+        shell: bash
         run: |
+          git clone https://github.com/flutter/flutter.git --branch ${{ env.FLUTTER_VERSION }} --depth 1
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
+          export PATH="$PWD/flutter/bin:$PATH"
+          
+          flutter doctor -v
           flutter config --enable-windows-desktop
           flutter precache --windows
+          
+          chmod +x .github/scripts/build_and_package_windows_amd64_zip.sh
+          .github/scripts/build_and_package_windows_amd64_zip.sh ${{ github.ref_name }}
+
 
       - name: Run build and release script
-        shell: pwsh
-        run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-          .\.github\scripts\build_and_package_windows_amd64_zip.ps1 ${{ github.ref_name }}
+        shell: bash
+        run: .github/scripts/build_and_package_windows_amd64_zip.sh ${{ github.ref_name }}
 
       - name: Upload build ${{ env.FILE_TYPE }} file to GitHub Release
         uses: softprops/action-gh-release@v2
