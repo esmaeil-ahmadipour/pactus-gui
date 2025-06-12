@@ -35,7 +35,7 @@ jobs:
           flutter precache --${{ env.TARGET_OS }}
 
       - name: Run build and release script
-        run: chmod +x .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}.sh && .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}.sh ${{ github.ref_name }}
+        run: chmod +x .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh && .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh ${{ github.ref_name }}
 
       - name: Upload build ${{ env.FILE_TYPE }} file to GitHub Release
         uses: softprops/action-gh-release@v2
