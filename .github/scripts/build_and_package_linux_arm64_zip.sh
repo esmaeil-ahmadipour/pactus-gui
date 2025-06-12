@@ -41,19 +41,42 @@ download_and_extract_pactus_cli() {
 }
 
 package_release_zip() {
-  echo "📦 Packaging final zip file..."
+  set -euo pipefail
+
+  echo "📦 Starting ZIP packaging..."
+
+  # Validate required directories
+  if [[ -z "${BUILD_DIR:-}" || ! -d "$BUILD_DIR" ]]; then
+    echo "❌ Error: BUILD_DIR '$BUILD_DIR' does not exist or is not set."
+    exit 1
+  fi
+
+  if [[ -z "${OUTPUT_NAME:-}" ]]; then
+    echo "❌ Error: OUTPUT_NAME is not set."
+    exit 1
+  fi
+
+  # Prepare output paths
   mkdir -p "$OUTPUT_DIR"
   ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
-  (
-    cd "$BUILD_DIR"
-    zip -r "$ZIP_PATH" .
-  )
-  echo "✅ Zip package saved to: $ZIP_PATH"
 
-  echo "📁 Copying zip to artifacts root..."
+  echo "📁 Compressing contents of '$BUILD_DIR' into '$ZIP_PATH'..."
+  cd "$BUILD_DIR"
+  if ! zip -r --symlinks "$ZIP_PATH" . > /dev/null; then
+    echo "❌ Error: Failed to create ZIP archive."
+    exit 1
+  fi
+  cd - > /dev/null
+
+  echo "✅ ZIP package created: $ZIP_PATH"
+
+  # Copy to root artifacts directory
   mkdir -p "$ROOT_OUTPUT_DIR"
-  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
+  cp -v "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
+
+  echo "📤 ZIP file copied to artifacts directory: $ROOT_OUTPUT_DIR/"
 }
+
 
 # ------------------------
 # MAIN
