@@ -10,8 +10,16 @@ CLI_DEST="$OUTPUT_DIR/lib/src/core/native_resources/linux"
 install_dependencies() {
   echo "🔧 Installing dependencies..."
   sudo apt-get update
-  sudo apt-get install -y wget unzip tree
+  sudo apt-get install -y \
+    libgtk-3-dev \
+    cmake \
+    ninja-build \
+    wget \
+    unzip \
+    tree \
+    pkg-config
 }
+
 
 build_flutter() {
   echo "🎯 Building Flutter Linux release..."
