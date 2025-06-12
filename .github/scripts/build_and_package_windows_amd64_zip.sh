@@ -18,14 +18,14 @@ FINAL_CLI_DEST="${BUILD_DIR}/data/flutter_assets/assets/native_resources/windows
 # FUNCTION
 # ------------------------
 
-install_flutter() {
-  echo "🔽 Cloning Flutter $FLUTTER_VERSION..."
-  git clone https://github.com/flutter/flutter.git --branch "$FLUTTER_VERSION" --depth 1
-  export PATH="$PWD/flutter/bin:$PATH"
-  flutter doctor -v
-  flutter config --enable-windows-desktop
-  flutter precache --windows
-}
+#install_flutter() {
+#  echo "🔽 Cloning Flutter $FLUTTER_VERSION..."
+#  git clone https://github.com/flutter/flutter.git --branch "$FLUTTER_VERSION" --depth 1
+#  export PATH="$PWD/flutter/bin:$PATH"
+#  flutter doctor -v
+#  flutter config --enable-windows-desktop
+#  flutter precache --windows
+#}
 
 build_flutter_windows() {
   echo "🔨 Building Flutter app for Windows ${ARCH}..."
@@ -68,7 +68,7 @@ package_release_zip() {
 # ------------------------
 # MAIN
 # ------------------------
-install_flutter
+#install_flutter
 build_flutter_windows
 download_and_extract_pactus_cli
 package_release_zip
