@@ -1,4 +1,4 @@
-name: Build & Release ARM64 AppImage
+name: Build & Release ARM64 (Linux / AppImage)
 
 on:
   push:
@@ -11,8 +11,12 @@ env:
   ARCH: arm64 # example `arm64` , `amd64`
 
 jobs:
-  build-and-release-arm64:
+  build-and-release:
     runs-on: ubuntu-22.04-arm
+    outputs:
+      tag_name: ${{ steps.download-links.outputs.tag_name }}
+      download_link: ${{ steps.download-links.outputs.download_link }}
+      release_link: ${{ steps.download-links.outputs.release_link }}
 
     permissions:
       contents: write  # Required to create/upload GitHub releases
@@ -45,10 +49,34 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate release download links
+        id: download-links
         run: |
           TAG=${{ github.ref_name }}
-          FILE=pactus_gui-aarch64.AppImage
+          FILE=PactusGUI-${TAG}-${{ env.TARGET_OS }}-${{ env.ARCH }}.AppImage
           DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${FILE}"
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG}"
           echo "Download URL: $DOWNLOAD_URL"
           echo "Release URL: $RELEASE_URL"
+          echo "tag_name=$TAG" >> $GITHUB_OUTPUT
+          echo "download_link=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          echo "release_link=RELEASE_URL" >> $GITHUB_OUTPUT
+
+
+  notify-linux:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: |
+            🚀 **GUI Release:** [${{ needs.build-and-release.outputs.tag_name }}](${{ needs.build-and-release.outputs.release_link }})  📥[Download ${{ env.TARGET_OS }}-${{ env.ARCH }} Version](${{ needs.build-and-release.download_link }})
+
+      - name: Send Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: |
+            🚀 **GUI Release:** [${{ needs.build-and-release.outputs.tag_name }}](${{ needs.build-and-release.outputs.release_link }})      📥[Download  ${{ env.TARGET_OS }}-${{ env.ARCH }} Version](${{ needs.build-and-release.outputs.download_link }})

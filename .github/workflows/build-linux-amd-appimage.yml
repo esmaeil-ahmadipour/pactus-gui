@@ -11,8 +11,11 @@ env:
   ARCH: amd64
 
 jobs:
-  build-and-release-amd64:
+  build-and-release:
     runs-on: ubuntu-22.04
+    outputs:
+      tag_name: ${{ steps.set-outputs.outputs.tag_name }}
+      download_link: ${{ steps.set-outputs.outputs.download_link }}
 
     permissions:
       contents: write
@@ -46,8 +49,27 @@ jobs:
       - name: Generate release download links
         run: |
           TAG=${{ github.ref_name }}
-          FILE=PactusGUI-${TAG}-linux-amd64.AppImage
+          FILE=PactusGUI-${TAG}-${{ env.TARGET_OS }}-${{ env.ARCH }}.AppImage
           DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${FILE}"
           RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG}"
           echo "Download URL: $DOWNLOAD_URL"
           echo "Release URL: $RELEASE_URL"
+
+  notify-linux:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord Notification
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          args: |
+            🚀 **GUI Release:** [${{ needs.build-and-release.outputs.tag_name }}](${{ needs.build-and-release.outputs.release_link }})  📥[Download ${{ env.TARGET_OS }}-${{ env.ARCH }} Version](${{ needs.build-and-release.download_link }})
+
+      - name: Send Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: |
+            🚀 **GUI Release:** [${{ needs.build-and-release.outputs.tag_name }}](${{ needs.build-and-release.outputs.release_link }})      📥[Download  ${{ env.TARGET_OS }}-${{ env.ARCH }} Version](${{ needs.build-and-release.outputs.download_link }})
