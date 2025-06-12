@@ -25,20 +25,36 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run build and release script
-        shell: bash
+      - name: Set up Flutter ${{ env.FLUTTER_VERSION }}
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+
+      - name: Configure Flutter for Windows
         run: |
-          git clone https://github.com/flutter/flutter.git --branch ${{ env.FLUTTER_VERSION }} --depth 1
-          echo "$PWD/flutter/bin" >> $GITHUB_PATH
-          export PATH="$PWD/flutter/bin:$PATH"
-          
-          flutter doctor -v
           flutter config --enable-windows-desktop
           flutter precache --windows
-          
-          chmod +x .github/scripts/build_and_package_windows_amd64_zip.sh
-          .github/scripts/build_and_package_windows_amd64_zip.sh ${{ github.ref_name }}
 
+      - name: Install Windows dependencies
+        shell: pwsh
+        run: |
+          # Ensure Chocolatey is installed
+          if (-not (Get-Command choco -ErrorAction SilentlyContinue)) {
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+          Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          }
+          
+          # Install packages one by one
+          choco install -y pkgconfiglite --no-progress
+          choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System' --no-progress
+          choco install -y ninja --no-progress
+          choco install -y visualstudio2022community --package-parameters "--add Microsoft.VisualStudio.Workload.NativeDesktop" --no-progress
+          choco install -y 7zip --no-progress
+          choco install -y openssl --no-progress
+          choco install -y curl --no-progress
+          choco install -y unzip --no-progress
 
       - name: Run build and release script
         shell: bash
