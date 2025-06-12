@@ -10,6 +10,7 @@ TAG_NAME="${1:-local}"
 ARCH="amd64"
 BUILD_DIR="$(pwd)/build/linux/x64/release/bundle"
 OUTPUT_DIR="$(pwd)/artifacts/linux/${ARCH}/release/bundle"
+ROOT_OUTPUT_DIR="$(pwd)/artifacts"
 OUTPUT_NAME="PactusGUI-${TAG_NAME}-linux-${ARCH}.zip"
 PACTUS_CLI_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_linux_amd64.tar.gz"
 FINAL_CLI_DEST="${BUILD_DIR}/lib/src/core/native_resources/linux"
@@ -42,9 +43,18 @@ download_and_extract_pactus_cli() {
 package_release_zip() {
   echo "📦 Packaging final zip file..."
   mkdir -p "$OUTPUT_DIR"
-  zip -r "$OUTPUT_DIR/$OUTPUT_NAME" "$BUILD_DIR"
-  echo "✅ Zip package saved to: $OUTPUT_DIR/$OUTPUT_NAME"
+  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
+  (
+    cd "$BUILD_DIR"
+    zip -r "$ZIP_PATH" .
+  )
+  echo "✅ Zip package saved to: $ZIP_PATH"
+
+  echo "📁 Copying zip to artifacts root..."
+  mkdir -p "$ROOT_OUTPUT_DIR"
+  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
 }
+
 
 # ------------------------
 # MAIN
