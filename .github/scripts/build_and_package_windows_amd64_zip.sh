@@ -43,63 +43,25 @@ download_and_extract_pactus_cli() {
 }
 
 package_release_zip() {
-  echo ""
-  echo "🟢=============================="
-  echo "🟢 Packaging final zip file (Windows)"
-  echo "🟢=============================="
-
-  # 🟩 پیدا کردن مسیر Build به‌صورت داینامیک
-  echo "🔍 Looking for Windows release build directory..."
-  BUILD_DIR=$(find "$(pwd)/build/windows" -type d -path "*/release/bundle" | head -n 1)
-
-  if [[ -z "$BUILD_DIR" ]]; then
-    echo "❌ ERROR: Could not find build output directory!"
-    exit 1
-  fi
-
-  echo "✅ Found build directory:"
-  echo "   📁 $BUILD_DIR"
-  echo ""
-
-  # 🟩 تعریف مسیرها
-  OUTPUT_DIR="$(pwd)/artifacts/windows/release/bundle"
-  ROOT_OUTPUT_DIR="$(pwd)/artifacts"
-  TAG_NAME="${1:-local}"
-  OUTPUT_NAME="PactusGUI-${TAG_NAME}-windows.zip"
-  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
-
-  # 🟩 تبدیل مسیرها به سبک Windows برای PowerShell
-  BUILD_DIR_WIN=$(cd "$BUILD_DIR" && pwd -W)
-  ZIP_PATH_WIN=$(cd "$(dirname "$ZIP_PATH")" && pwd -W)\\$(basename "$ZIP_PATH")
-
-  echo "📁 BUILD_DIR (Win-style): $BUILD_DIR_WIN"
-  echo "📦 ZIP will be created at (Win-style): $ZIP_PATH_WIN"
-  echo ""
-
-  # 🟩 محتوای پوشه‌ی Build رو چاپ کن برای شفافیت
-  echo "📂 Listing content of build directory:"
-  ls -al "$BUILD_DIR"
-  echo ""
-
-  # 🟩 فشرده‌سازی با PowerShell
-  echo "🛠 Compressing files..."
+  echo "📦 Packaging final zip file (Windows)..."
   mkdir -p "$OUTPUT_DIR"
-  powershell.exe -Command "Compress-Archive -Path '${BUILD_DIR_WIN}\\*' -DestinationPath '${ZIP_PATH_WIN}' -Force"
-  echo ""
+  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
+  echo "📁 Zipping from: $BUILD_DIR"
+  echo "📦 To: $ZIP_PATH"
+  (
+    cd "$BUILD_DIR"
+    zip -r "$ZIP_PATH" .
+  )
+  echo "✅ Zip package saved to: $ZIP_PATH"
 
-  echo "✅ Zip package created successfully:"
-  echo "   📦 $ZIP_PATH"
-
-  # 🟩 کپی به پوشه‌ی ریشه‌ی artifacts
-  echo "📁 Copying ZIP to root artifacts directory..."
+  echo "📁 Copying zip to artifacts root..."
   mkdir -p "$ROOT_OUTPUT_DIR"
   cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
 
-  echo ""
-  echo "🎉 Done! Artifact available at:"
-  echo "   👉 $ROOT_OUTPUT_DIR/$(basename "$ZIP_PATH")"
-  echo ""
+  echo "📂 Listing copied zip:"
+  ls -lh "$ROOT_OUTPUT_DIR/$OUTPUT_NAME"
 }
+
 
 
 
