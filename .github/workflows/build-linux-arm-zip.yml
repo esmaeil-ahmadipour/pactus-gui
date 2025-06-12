@@ -13,7 +13,7 @@ env:
 
 jobs:
   build-and-release:
-    runs-on: ubuntu-22.04 # example `ubuntu-22.04-arm` , `ubuntu-22.04` , `ubuntu-latest` , `macos-latest` , `windows-latest`
+    runs-on: ubuntu-22.04-arm # example `ubuntu-22.04-arm` , `ubuntu-22.04` , `ubuntu-latest` , `macos-latest` , `windows-latest`
     outputs:
       tag_name: ${{ steps.set-outputs.outputs.tag_name }}
       download_link: ${{ steps.set-outputs.outputs.download_link }}
