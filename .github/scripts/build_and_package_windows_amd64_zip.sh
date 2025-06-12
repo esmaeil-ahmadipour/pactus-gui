@@ -43,19 +43,27 @@ download_and_extract_pactus_cli() {
 }
 
 package_release_zip() {
-  echo "📦 Packaging final zip file..."
+  echo "📦 Packaging final zip file (Windows)..."
+
   mkdir -p "$OUTPUT_DIR"
   ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
-  (
-    cd "$BUILD_DIR"
-    zip -r "$ZIP_PATH" .
-  )
+
+  # تبدیل مسیر به سبک Windows
+  BUILD_DIR_WIN=$(cd "$BUILD_DIR" && pwd -W)
+  ZIP_PATH_WIN=$(cd "$(dirname "$ZIP_PATH")" && pwd -W)\\$(basename "$ZIP_PATH")
+
+  echo "📁 Zipping from: $BUILD_DIR_WIN"
+  echo "📦 To: $ZIP_PATH_WIN"
+
+  powershell.exe -Command "Compress-Archive -Path '${BUILD_DIR_WIN}\\*' -DestinationPath '${ZIP_PATH_WIN}' -Force"
+
   echo "✅ Zip package saved to: $ZIP_PATH"
 
   echo "📁 Copying zip to artifacts root..."
   mkdir -p "$ROOT_OUTPUT_DIR"
   cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
 }
+
 
 # ------------------------
 # MAIN
