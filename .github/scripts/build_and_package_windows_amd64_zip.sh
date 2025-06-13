@@ -7,8 +7,8 @@ set -euo pipefail
 FLUTTER_VERSION="3.32.0"
 ARCH="amd64"
 TAG_NAME="${1:-local}"
-BUILD_DIR="$(pwd)/build/windows/${ARCH}/release/bundle"
-OUTPUT_DIR="$(pwd)/artifacts/windows/${ARCH}/release/bundle"
+BUILD_DIR="$(pwd)/build/windows/x64/runner/Release"
+OUTPUT_DIR="$(pwd)/artifacts/windows/${ARCH}"
 ROOT_OUTPUT_DIR="$(pwd)/artifacts"
 OUTPUT_NAME="PactusGUI-${TAG_NAME}-windows-${ARCH}.zip"
 PACTUS_CLI_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_windows_amd64.zip"
@@ -42,22 +42,15 @@ package_release_zip() {
   ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
   cd "$BUILD_DIR"
 
-  echo "📁 Zipping contents of: $BUILD_DIR"
+  echo "📁 Creating Windows release package using 7zip..."
 
-  # استفاده از zip در Git Bash
-  if command -v zip &> /dev/null; then
-    zip -r "$ZIP_PATH" ./*
-  else
-    # اگر zip نصب نیست، از tar استفاده کنید
-    tar -a -cvf "$ZIP_PATH" -- *
-  fi
+  # استفاده از 7zip برای ایجاد فایل zip
+  7z a -tzip "$ZIP_PATH" ./*
 
-  echo "✅ Zip package saved to: $ZIP_PATH"
+  echo "✅ Package saved to: $ZIP_PATH"
 
-  echo "📁 Copying zip to artifacts root..."
   cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
-  echo "✅ Zip package copy to: $ROOT_OUTPUT_DIR"
-  ls -lh "$ROOT_OUTPUT_DIR"
+  echo "✅ Package copied to: $ROOT_OUTPUT_DIR"
 
   echo "📂 Listing artifacts:"
   ls -lh "$OUTPUT_DIR"
@@ -71,5 +64,4 @@ build_flutter_windows
 download_and_extract_pactus_cli
 package_release_zip
 
-# خروجی مسیر فایل برای استفاده در مرحله بعدی
-echo "ZIP_PATH=$ROOT_OUTPUT_DIR/$OUTPUT_NAME" >> $GITHUB_ENV
+echo "RELEASE_ZIP_PATH=$ROOT_OUTPUT_DIR/$OUTPUT_NAME" >> $GITHUB_ENV
