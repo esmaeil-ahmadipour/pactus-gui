@@ -12,7 +12,7 @@ OUTPUT_DIR="$(pwd)/artifacts/windows/${ARCH}"
 ROOT_OUTPUT_DIR="$(pwd)/artifacts"
 OUTPUT_NAME="PactusGUI-${TAG_NAME}-windows-${ARCH}.zip"
 PACTUS_CLI_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_windows_amd64.zip"
-FINAL_CLI_DEST="${BUILD_DIR}/data/flutter_assets/assets/native_resources/windows"
+FINAL_CLI_DEST="${BUILD_DIR}/lib/src/core/native_resources/windows"
 
 # ------------------------
 # FUNCTION
