@@ -28,40 +28,45 @@ download_and_extract_pactus_cli() {
   echo "⬇️ Downloading pactus-cli..."
   curl -sSL "$PACTUS_CLI_URL" -o pactus-cli.zip
 
-  echo "📦 Extracting pactus-cli to ${FINAL_CLI_DEST}..."
+  # Create temp directory for extraction
+  local temp_dir=$(mktemp -d)
+
+  echo "📦 Extracting pactus-cli to temp directory..."
+  unzip -q pactus-cli.zip -d "$temp_dir"
+
+  echo "🚚 Moving CLI files to final destination..."
   mkdir -p "$FINAL_CLI_DEST"
-  unzip -q pactus-cli.zip -d "$FINAL_CLI_DEST"
+  mv "$temp_dir"/*/* "$FINAL_CLI_DEST"/
+
+  # Cleanup
+  rm -rf "$temp_dir" pactus-cli.zip
 }
 
 package_release_zip() {
   echo "📦 Packaging final zip file..."
-
   mkdir -p "$OUTPUT_DIR"
   mkdir -p "$ROOT_OUTPUT_DIR"
 
-  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
+  local zip_path="$OUTPUT_DIR/$OUTPUT_NAME"
   cd "$BUILD_DIR"
 
   echo "📁 Creating Windows release package using 7zip..."
+  7z a -tzip "$zip_path" ./*
 
-  # استفاده از 7zip برای ایجاد فایل zip
-  7z a -tzip "$ZIP_PATH" ./*
-
-  echo "✅ Package saved to: $ZIP_PATH"
-
-  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
+  echo "✅ Package saved to: $zip_path"
+  cp "$zip_path" "$ROOT_OUTPUT_DIR/"
   echo "✅ Package copied to: $ROOT_OUTPUT_DIR"
 
   echo "📂 Listing artifacts:"
   ls -lh "$OUTPUT_DIR"
   ls -lh "$ROOT_OUTPUT_DIR"
+  echo "RELEASE_ZIP_PATH=$ROOT_OUTPUT_DIR/$OUTPUT_NAME" >> $GITHUB_ENV
 }
 
 # ------------------------
 # MAIN
 # ------------------------
+
 build_flutter_windows
 download_and_extract_pactus_cli
 package_release_zip
-
-echo "RELEASE_ZIP_PATH=$ROOT_OUTPUT_DIR/$OUTPUT_NAME" >> $GITHUB_ENV
