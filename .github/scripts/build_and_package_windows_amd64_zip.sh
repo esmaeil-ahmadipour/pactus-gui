@@ -18,15 +18,6 @@ FINAL_CLI_DEST="${BUILD_DIR}/data/flutter_assets/assets/native_resources/windows
 # FUNCTION
 # ------------------------
 
-#install_flutter() {
-#  echo "🔽 Cloning Flutter $FLUTTER_VERSION..."
-#  git clone https://github.com/flutter/flutter.git --branch "$FLUTTER_VERSION" --depth 1
-#  export PATH="$PWD/flutter/bin:$PATH"
-#  flutter doctor -v
-#  flutter config --enable-windows-desktop
-#  flutter precache --windows
-#}
-
 build_flutter_windows() {
   echo "🔨 Building Flutter app for Windows ${ARCH}..."
   flutter pub get
@@ -48,33 +39,37 @@ package_release_zip() {
   mkdir -p "$OUTPUT_DIR"
   mkdir -p "$ROOT_OUTPUT_DIR"
 
-  $ZIP_PATH = "$OUTPUT_DIR\$OUTPUT_NAME"
+  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
   cd "$BUILD_DIR"
 
   echo "📁 Zipping contents of: $BUILD_DIR"
 
-  # روش اول: استفاده از Compress-Archive (پاورشل)
-  Compress-Archive -Path ".\*" -DestinationPath "$ZIP_PATH" -Force
-
-  # یا روش دوم: استفاده از tar (ویندوز ۱۰+)
-  # tar -a -cvf "$ZIP_PATH" -- *
+  # استفاده از zip در Git Bash
+  if command -v zip &> /dev/null; then
+    zip -r "$ZIP_PATH" ./*
+  else
+    # اگر zip نصب نیست، از tar استفاده کنید
+    tar -a -cvf "$ZIP_PATH" -- *
+  fi
 
   echo "✅ Zip package saved to: $ZIP_PATH"
 
   echo "📁 Copying zip to artifacts root..."
-  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR\"
+  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
   echo "✅ Zip package copy to: $ROOT_OUTPUT_DIR"
-  dir "$ROOT_OUTPUT_DIR"
+  ls -lh "$ROOT_OUTPUT_DIR"
 
   echo "📂 Listing artifacts:"
-  dir "$OUTPUT_DIR"
-  dir "$ROOT_OUTPUT_DIR"
+  ls -lh "$OUTPUT_DIR"
+  ls -lh "$ROOT_OUTPUT_DIR"
 }
 
 # ------------------------
 # MAIN
 # ------------------------
-#install_flutter
 build_flutter_windows
 download_and_extract_pactus_cli
 package_release_zip
+
+# خروجی مسیر فایل برای استفاده در مرحله بعدی
+echo "ZIP_PATH=$ROOT_OUTPUT_DIR/$OUTPUT_NAME" >> $GITHUB_ENV
