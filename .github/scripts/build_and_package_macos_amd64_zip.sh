@@ -35,24 +35,50 @@ download_and_extract_pactus_cli() {
   rm pactus-cli.tar.gz
 }
 
+#package_release_zip() {
+#  echo "📦 Packaging final zip file..."
+#  mkdir -p "$OUTPUT_DIR"
+#  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
+#
+#  echo "📁 Creating macOS release package from full build directory..."
+#  (
+#    cd "$BUILD_DIR"
+#    zip -r "$ZIP_PATH" .
+#  )
+#
+#  echo "✅ Zip package saved to: $ZIP_PATH"
+#
+#  echo "📁 Copying zip to artifacts root..."
+#  mkdir -p "$ROOT_OUTPUT_DIR"
+#  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
+#}
 package_release_zip() {
   echo "📦 Packaging final zip file..."
   mkdir -p "$OUTPUT_DIR"
+  mkdir -p "$ROOT_OUTPUT_DIR"
+
   ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
 
-  echo "📁 Creating macOS release package from full build directory..."
-  (
-    cd "$BUILD_DIR"
-    zip -r "$ZIP_PATH" .
-  )
+  echo "📁 Creating macOS release package..."
+  ditto -c -k --keepParent "$BUILD_DIR/PactusGUI.app" "$ZIP_PATH"
 
   echo "✅ Zip package saved to: $ZIP_PATH"
-
-  echo "📁 Copying zip to artifacts root..."
-  mkdir -p "$ROOT_OUTPUT_DIR"
   cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
-}
 
+  # ایجاد یک دایرکتوری موقت برای بررسی محتوا
+  TEMP_DIR=$(mktemp -d)
+  echo "🔍 Examining zip contents in temporary directory: $TEMP_DIR"
+
+  # اکسترکت کردن فایل زیپ
+  unzip -q "$ZIP_PATH" -d "$TEMP_DIR"
+
+  # نمایش ساختار با tree
+  echo "🌳 ZIP contents structure:"
+  tree "$TEMP_DIR"
+
+  # پاکسازی
+  rm -rf "$TEMP_DIR"
+}
 # ------------------------
 # MAIN
 # ------------------------
