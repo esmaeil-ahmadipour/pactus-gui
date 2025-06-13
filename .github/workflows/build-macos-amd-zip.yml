@@ -45,8 +45,6 @@ jobs:
           # Install required dependencies
           brew install cmake pkg-config ninja
           brew install unzip
-          brew install tree
-
 
       - name: Run build and release script
         run: chmod +x .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh && .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh ${{ github.ref_name }}
