@@ -1,4 +1,4 @@
-name: Build & Release AMD64 AppImage
+name: Build & Release Linux (AMD64/AppImage)
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
 env:
   FLUTTER_VERSION: 3.32.0
   TARGET_OS: linux # example `linux` , `windows` , `macos`
-  artifacts_path: artifacts/
   ARCH: amd64 # example `arm64` , `amd64`
   FILE_TYPE: AppImage # example `AppImage` , `zip` , `dmg`
 
@@ -47,7 +46,7 @@ jobs:
           tag_name: "${{ github.ref_name }}"
           name: "${{ github.ref_name }}"
           body: "Automated release for ${{ github.ref_name }}"
-          files: "${{ env.artifacts_path }}PactusGUI-${{ github.ref_name }}-${{ env.TARGET_OS }}-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
+          files: "artifacts/PactusGUI-${{ github.ref_name }}-${{ env.TARGET_OS }}-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

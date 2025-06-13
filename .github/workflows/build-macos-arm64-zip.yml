@@ -1,4 +1,4 @@
-name: Build & Release Windows AMD64 Zip
+name: Build & Release MacOs (ARM64/Zip)
 
 on:
   push:
@@ -8,7 +8,6 @@ on:
 env:
   FLUTTER_VERSION: 3.32.0
   TARGET_OS: macos # example `linux` , `windows` , `macos`
-  artifacts_path: artifacts/ # using for windows `artifacts/` and for linux/macos `artifacts\`
   ARCH: arm64 # example `arm64` , `amd64`
   FILE_TYPE: zip # example `AppImage` , `zip` , `dmg`
 
@@ -17,7 +16,7 @@ permissions:
 
 jobs:
   build-and-release:
-    runs-on: macos-13
+    runs-on: macos-1۴
     outputs:
       tag_name: ${{ steps.set-outputs.outputs.tag_name }}
       download_link: ${{ steps.set-outputs.outputs.download_link }}
@@ -57,7 +56,7 @@ jobs:
           tag_name: "${{ github.ref_name }}"
           name: "${{ github.ref_name }}"
           body: "Automated release for ${{ github.ref_name }}"
-          files: "${{ env.artifacts_path }}PactusGUI-${{ github.ref_name }}-${{ env.TARGET_OS }}-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
+          files: "artifacts/PactusGUI-${{ github.ref_name }}-${{ env.TARGET_OS }}-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
