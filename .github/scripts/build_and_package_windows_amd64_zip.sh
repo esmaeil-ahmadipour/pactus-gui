@@ -43,27 +43,33 @@ download_and_extract_pactus_cli() {
 }
 
 package_release_zip() {
-  echo "📦 Packaging final zip file (Windows)..."
+  echo "📦 Packaging final zip file..."
+
   mkdir -p "$OUTPUT_DIR"
-  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
-  echo "📁 Zipping from: $BUILD_DIR"
-  echo "📦 To: $ZIP_PATH"
-  (
-    cd "$BUILD_DIR"
-    zip -r "$ZIP_PATH" .
-  )
+  mkdir -p "$ROOT_OUTPUT_DIR"
+
+  $ZIP_PATH = "$OUTPUT_DIR\$OUTPUT_NAME"
+  cd "$BUILD_DIR"
+
+  echo "📁 Zipping contents of: $BUILD_DIR"
+
+  # روش اول: استفاده از Compress-Archive (پاورشل)
+  Compress-Archive -Path ".\*" -DestinationPath "$ZIP_PATH" -Force
+
+  # یا روش دوم: استفاده از tar (ویندوز ۱۰+)
+  # tar -a -cvf "$ZIP_PATH" -- *
+
   echo "✅ Zip package saved to: $ZIP_PATH"
 
   echo "📁 Copying zip to artifacts root..."
-  mkdir -p "$ROOT_OUTPUT_DIR"
-  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
+  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR\"
+  echo "✅ Zip package copy to: $ROOT_OUTPUT_DIR"
+  dir "$ROOT_OUTPUT_DIR"
 
-  echo "📂 Listing copied zip:"
-  ls -lh "$ROOT_OUTPUT_DIR/$OUTPUT_NAME"
+  echo "📂 Listing artifacts:"
+  dir "$OUTPUT_DIR"
+  dir "$ROOT_OUTPUT_DIR"
 }
-
-
-
 
 # ------------------------
 # MAIN
