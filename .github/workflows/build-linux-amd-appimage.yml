@@ -8,6 +8,7 @@ on:
 env:
   FLUTTER_VERSION: 3.32.0
   TARGET_OS: linux # example `linux` , `windows` , `macos`
+  artifacts_path: artifacts\ # using for windows `artifacts/` and for linux/macos `artifacts\`
   ARCH: amd64 # example `arm64` , `amd64`
   FILE_TYPE: AppImage # example `AppImage` , `zip` , `dmg`
 
@@ -37,13 +38,13 @@ jobs:
       - name: Run build and release script
         run: chmod +x .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh && .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh ${{ github.ref_name }}
 
-      - name: Upload build ${{ env.FILE_TYPE }} file to GitHub Release
+      - name: Upload build file to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "${{ github.ref_name }}"
           name: "${{ github.ref_name }}"
           body: "Automated release for ${{ github.ref_name }}"
-          files: "artifacts/PactusGUI-${{ github.ref_name }}-${{ env.TARGET_OS }}-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
+          files: "${{ env.artifacts_path }}PactusGUI-${{ github.ref_name }}-${{ env.TARGET_OS }}-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

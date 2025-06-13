@@ -72,7 +72,6 @@ build_appimage() {
     --icon-file "$APPDIR/pactus_gui.png" \
     --output appimage
 
-  # پیدا کردن اولین AppImage تولیدشده
   GENERATED_APPIMAGE=$(find . -maxdepth 1 -type f -name "*.AppImage" | head -n 1)
 
   if [[ ! -f "$GENERATED_APPIMAGE" ]]; then
