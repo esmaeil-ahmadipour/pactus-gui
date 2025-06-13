@@ -11,15 +11,15 @@ env:
   ARCH: arm64 # example `arm64` , `amd64`
   FILE_TYPE: zip # example `AppImage` , `zip` , `dmg`
 
-permissions:
-  contents: write
-
 jobs:
   build-and-release:
-    runs-on: macos-1۴
+    runs-on: macos-latest
     outputs:
       tag_name: ${{ steps.set-outputs.outputs.tag_name }}
       download_link: ${{ steps.set-outputs.outputs.download_link }}
+
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -46,9 +46,7 @@ jobs:
           brew install unzip
 
       - name: Run build and release script
-        run: |
-          bash .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh && .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh ${{ github.ref_name }}
-        shell: bash
+        run: chmod +x .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh && .github/scripts/build_and_package_${{ env.TARGET_OS }}_${{ env.ARCH }}_${{ env.FILE_TYPE }}.sh ${{ github.ref_name }}
 
       - name: Upload build file to GitHub Release
         uses: softprops/action-gh-release@v2
@@ -56,17 +54,19 @@ jobs:
           tag_name: "${{ github.ref_name }}"
           name: "${{ github.ref_name }}"
           body: "Automated release for ${{ github.ref_name }}"
-          files: "artifacts/PactusGUI-${{ github.ref_name }}-${{ env.TARGET_OS }}-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
+          files: "artifacts/PactusGUI-${{ github.ref_name }}-macos-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate release download links
-        id: set-outputs
         run: |
-          echo "tag_name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
-          $file = "PactusGUI-${{ github.ref_name }}-${{ env.TARGET_OS }}-${{ env.ARCH }}.${{ env.FILE_TYPE }}"
-          $download = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${file}"
-          echo "download_link=$download" >> $GITHUB_OUTPUT
+          TAG=${{ github.ref_name }}
+          FILE=PactusGUI-${TAG}-macos-${{ env.ARCH }}.${{ env.FILE_TYPE }}
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${TAG}/${FILE}"
+          RELEASE_URL="https://github.com/${{ github.repository }}/releases/tag/${TAG}"
+          echo "tag_name=${TAG}" >> $GITHUB_OUTPUT
+          echo "download_link=${DOWNLOAD_URL}" >> $GITHUB_OUTPUT
+          echo "release_link=${RELEASE_URL}" >> $GITHUB_OUTPUT
 
   notify-service:
     needs: build-and-release
