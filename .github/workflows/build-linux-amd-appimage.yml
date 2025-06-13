@@ -31,6 +31,9 @@ jobs:
           git clone https://github.com/flutter/flutter.git --branch ${{ env.FLUTTER_VERSION }} --depth 1
           echo "$PWD/flutter/bin" >> $GITHUB_PATH
           export PATH="$PWD/flutter/bin:$PATH"
+
+      - name: Configure Flutter
+        run: |
           flutter doctor -v
           flutter config --enable-${{ env.TARGET_OS }}-desktop
           flutter precache --${{ env.TARGET_OS }}

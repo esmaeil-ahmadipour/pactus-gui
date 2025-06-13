@@ -32,12 +32,13 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
 
-      - name: Configure Flutter for Windows
+      - name: Configure Flutter
         run: |
-          flutter config --enable-windows-desktop
-          flutter precache --windows
+          flutter doctor -v
+          flutter config --enable-${{ env.TARGET_OS }}-desktop
+          flutter precache --${{ env.TARGET_OS }}
 
-      - name: Install Windows dependencies
+      - name: Install dependencies
         shell: pwsh
         run: |
           # Ensure Chocolatey is installed
