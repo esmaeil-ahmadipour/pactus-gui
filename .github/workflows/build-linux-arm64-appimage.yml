@@ -8,7 +8,7 @@ on:
 env:
   FLUTTER_VERSION: 3.32.0
   TARGET_OS: linux # example `linux` , `windows` , `macos`
-  artifacts_path: artifacts\ # using for windows `artifacts/` and for linux/macos `artifacts\`
+  artifacts_path: artifacts/ # using for windows `artifacts/` and for linux/macos `artifacts\`
   ARCH: arm64 # example `arm64` , `amd64`
   FILE_TYPE: AppImage # example `AppImage` , `zip` , `dmg`
 
