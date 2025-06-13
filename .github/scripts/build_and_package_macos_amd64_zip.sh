@@ -22,7 +22,8 @@ FINAL_CLI_DEST="${BUILD_DIR}/PactusGUI.app/Contents/MacOS/lib/src/core/native_re
 build_flutter_macos() {
   echo "🔨 Building Flutter app for macOS ${ARCH}..."
   flutter pub get
-  flutter build macos --release
+  flutter build macos --release --target-platform darwin-x64
+
 }
 
 download_and_extract_pactus_cli() {
