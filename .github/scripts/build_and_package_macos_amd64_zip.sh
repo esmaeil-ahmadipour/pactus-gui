@@ -33,7 +33,6 @@ install_dependencies() {
 build_flutter_macos() {
   echo "🔨 Building Flutter app for macOS AMD64..."
   flutter pub get
-  flutter clean
   flutter build macos --release
 
   # Check if build was successful
