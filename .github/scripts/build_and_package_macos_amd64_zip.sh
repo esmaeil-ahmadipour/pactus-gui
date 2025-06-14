@@ -2,26 +2,38 @@
 
 set -euo pipefail
 
-# ------------------------
+# --------------------------------------
 # CONFIGURATION
-# ------------------------
+# --------------------------------------
 
-TAG_NAME="${1:-local}"
-ARCH="amd64"
-BUILD_DIR="$(pwd)/build/macos/Build/Products/Release"
-OUTPUT_DIR="$(pwd)/artifacts/macos/${ARCH}"
-ROOT_OUTPUT_DIR="$(pwd)/artifacts"
-OUTPUT_NAME="PactusGUI-${TAG_NAME}-macos-${ARCH}.zip"
+TAG_NAME="${1:-local}"  # Use first argument as tag or fallback to 'local'
+OUTPUT_NAME="PactusGUI-${TAG_NAME}-macos-amd64.zip"  # Changed to ZIP
+APP_NAME="Pactus GUI"
+APPDIR="temp_zip"  # Changed from temp_dmg
+APP_PATH="build/macos/Build/Products/Release/gui.app"
 PACTUS_CLI_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_darwin_amd64.tar.gz"
-FINAL_CLI_DEST="${BUILD_DIR}/lib/src/core/native_resources/macos"
 
-# ------------------------
+# --------------------------------------
 # FUNCTIONS
-# ------------------------
+# --------------------------------------
+
+install_dependencies() {
+  echo "🔧 Installing dependencies..."
+  # if required
+  if ! command -v create-dmg &> /dev/null; then
+    brew install create-dmg
+  fi
+  # No longer need create-dmg for ZIP
+  if ! command -v zip &> /dev/null; then
+    echo "❌ Error: zip command not found!"
+    exit 1
+  fi
+}
 
 build_flutter_macos() {
-  echo "🔨 Building Flutter app for macOS ${ARCH}..."
+  echo "🔨 Building Flutter app for macOS AMD64..."
   flutter pub get
+  flutter clean
   flutter build macos --release
 
   # Check if build was successful
@@ -29,50 +41,164 @@ build_flutter_macos() {
       echo "❌ Error: Flutter build failed!"
       exit 1
   fi
-
-  # Clean up unnecessary files (added this part)
-  echo "🧹 Cleaning up build directory..."
-  cd build/macos/Build/Products/Release/
-  for item in *; do
-      if [[ "$item" != "gui.app" && "$item" != "lib" ]]; then
-          rm -rf "$item"
-      fi
-  done
-  cd - > /dev/null
 }
 
-download_and_extract_pactus_cli() {
-  echo "⬇️ Downloading pactus-cli..."
-  curl -sSL "$PACTUS_CLI_URL" -o pactus-cli.tar.gz
+prepare_app_bundle() {
+  echo "📁 Preparing App Bundle..."
+  rm -rf "$APPDIR"
+  mkdir -p "$APPDIR"
 
-  echo "📦 Extracting pactus-cli to ${FINAL_CLI_DEST}..."
-  mkdir -p "$FINAL_CLI_DEST"
-  tar -xzvf pactus-cli.tar.gz --strip-components=1 -C "$FINAL_CLI_DEST"
-  rm pactus-cli.tar.gz
+  # Copy the app bundle
+  cp -R "$APP_PATH" "$APPDIR/$APP_NAME.app"
+
+  # Download and extract native resources
+  echo "⬇️ Downloading and extracting pactus-cli from $PACTUS_CLI_URL..."
+  curl -L -o pactus-assets.tar.gz "$PACTUS_CLI_URL"
+  tar -xzf pactus-assets.tar.gz --strip-components=1 -C "$APPDIR/$APP_NAME.app/Contents/MacOS/"
+
+  # Make native resources executable
+  chmod +x "$APPDIR/$APP_NAME.app/Contents/MacOS/pactus"*
+
+  # Ad-hoc code signing to remove security warnings
+  echo "🔏 Code signing the app bundle..."
+  # Sign all executables in the app bundle
+  find "$APPDIR/$APP_NAME.app" -type f -perm +111 -exec codesign --force --deep --sign - {} \;
+  # Sign the app bundle itself
+  codesign --force --deep --sign - "$APPDIR/$APP_NAME.app"
+
+  # Create launch wrapper
+  echo "📝 Creating launch wrapper..."
+  cat > "$APPDIR/$APP_NAME.app/Contents/MacOS/gui_original" << 'EOF'
+#!/bin/bash
+
+# Get the directory where this script is located (Contents/MacOS)
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Set the path to native resources for macOS
+export PACTUS_NATIVE_RESOURCES="$HERE"
+
+# Launch the actual GUI application
+exec "$HERE/gui_flutter" "$@"
+EOF
+
+  # Rename the original executable and replace with our wrapper
+  mv "$APPDIR/$APP_NAME.app/Contents/MacOS/gui" "$APPDIR/$APP_NAME.app/Contents/MacOS/gui_flutter"
+  mv "$APPDIR/$APP_NAME.app/Contents/MacOS/gui_original" "$APPDIR/$APP_NAME.app/Contents/MacOS/gui"
+  chmod +x "$APPDIR/$APP_NAME.app/Contents/MacOS/gui"
 }
 
-package_release_zip() {
-  echo "📦 Packaging final zip file..."
-  mkdir -p "$OUTPUT_DIR"
-  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
+create_zip() {  # Replaced create_dmg with create_zip
+  echo "📦 Creating ZIP file..."
+  mkdir -p artifacts
+  ZIP_PATH="artifacts/${OUTPUT_NAME}"
 
-  echo "📁 Creating macOS release package from full build directory..."
-  (
-    cd "$BUILD_DIR"
-    zip -r "$ZIP_PATH" .
-  )
+  # Remove existing ZIP if any
+  rm -f "$ZIP_PATH"
 
-  echo "✅ Zip package saved to: $ZIP_PATH"
+  # Create the ZIP file
+  (cd "$APPDIR" && zip -qr "../$ZIP_PATH" .)
 
-  echo "📁 Copying zip to artifacts root..."
-  mkdir -p "$ROOT_OUTPUT_DIR"
-  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
+  # Verify ZIP creation
+  if [ ! -f "$ZIP_PATH" ]; then
+      echo "❌ Error: ZIP creation failed!"
+      exit 1
+  fi
+
+  echo "✅ ZIP created successfully: $ZIP_PATH"
+
+  echo "file_name=${OUTPUT_NAME}" >> $GITHUB_OUTPUT
 }
 
-# ------------------------
-# MAIN
-# ------------------------
+cleanup() {
+  echo "🧹 Cleaning up temporary files..."
+  rm -rf "$APPDIR"
+  rm -f pactus-assets.tar.gz
+}
 
+# --------------------------------------
+# MAIN EXECUTION
+# --------------------------------------
+
+install_dependencies
 build_flutter_macos
-download_and_extract_pactus_cli
-package_release_zip
+prepare_app_bundle
+create_zip  # Changed from create_dmg
+cleanup
+##!/usr/bin/env bash
+#
+#set -euo pipefail
+#
+## ------------------------
+## CONFIGURATION
+## ------------------------
+#
+#TAG_NAME="${1:-local}"
+#ARCH="amd64"
+#BUILD_DIR="$(pwd)/build/macos/Build/Products/Release"
+#OUTPUT_DIR="$(pwd)/artifacts/macos/${ARCH}"
+#ROOT_OUTPUT_DIR="$(pwd)/artifacts"
+#OUTPUT_NAME="PactusGUI-${TAG_NAME}-macos-${ARCH}.zip"
+#PACTUS_CLI_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_darwin_amd64.tar.gz"
+#FINAL_CLI_DEST="${BUILD_DIR}/lib/src/core/native_resources/macos"
+#
+## ------------------------
+## FUNCTIONS
+## ------------------------
+#
+#build_flutter_macos() {
+#  echo "🔨 Building Flutter app for macOS ${ARCH}..."
+#  flutter pub get
+#  flutter build macos --release
+#
+#  # Check if build was successful
+#  if [ ! -d "$APP_PATH" ]; then
+#      echo "❌ Error: Flutter build failed!"
+#      exit 1
+#  fi
+#
+#  # Clean up unnecessary files (added this part)
+#  echo "🧹 Cleaning up build directory..."
+#  cd build/macos/Build/Products/Release/
+#  for item in *; do
+#      if [[ "$item" != "gui.app" && "$item" != "lib" ]]; then
+#          rm -rf "$item"
+#      fi
+#  done
+#  cd - > /dev/null
+#}
+#
+#download_and_extract_pactus_cli() {
+#  echo "⬇️ Downloading pactus-cli..."
+#  curl -sSL "$PACTUS_CLI_URL" -o pactus-cli.tar.gz
+#
+#  echo "📦 Extracting pactus-cli to ${FINAL_CLI_DEST}..."
+#  mkdir -p "$FINAL_CLI_DEST"
+#  tar -xzvf pactus-cli.tar.gz --strip-components=1 -C "$FINAL_CLI_DEST"
+#  rm pactus-cli.tar.gz
+#}
+#
+#package_release_zip() {
+#  echo "📦 Packaging final zip file..."
+#  mkdir -p "$OUTPUT_DIR"
+#  ZIP_PATH="$OUTPUT_DIR/$OUTPUT_NAME"
+#
+#  echo "📁 Creating macOS release package from full build directory..."
+#  (
+#    cd "$BUILD_DIR"
+#    zip -r "$ZIP_PATH" .
+#  )
+#
+#  echo "✅ Zip package saved to: $ZIP_PATH"
+#
+#  echo "📁 Copying zip to artifacts root..."
+#  mkdir -p "$ROOT_OUTPUT_DIR"
+#  cp "$ZIP_PATH" "$ROOT_OUTPUT_DIR/"
+#}
+#
+## ------------------------
+## MAIN
+## ------------------------
+#
+#build_flutter_macos
+#download_and_extract_pactus_cli
+#package_release_zip
