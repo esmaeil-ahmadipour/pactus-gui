@@ -36,7 +36,7 @@ dependencies:
   grpc:
   intl: ^0.20.2
   pactus_gui_widgetbook:
-#        path: ../pactus-gui-widgetbook
+    #        path: ../pactus-gui-widgetbook
     git:
       url: https://github.com/pactus-project/pactus-gui-widgetbook.git
       ref: fdf61d75a8d689a65b6abc05ec315f0420e3e071
@@ -49,6 +49,7 @@ dependencies:
   window_manager: ^0.4.0
 
 dev_dependencies:
+  analyzer: ^7.4.5
   build_runner:
   flutter_lints: ^5.0.0
   flutter_test:
