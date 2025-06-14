@@ -36,6 +36,16 @@ build_flutter_macos() {
       echo "❌ Error: Flutter build failed!"
       exit 1
   fi
+
+  # Clean up unnecessary files (added this part)
+  echo "🧹 Cleaning up build directory..."
+  cd build/macos/Build/Products/Release/
+  for item in *; do
+      if [[ "$item" != "gui.app" && "$item" != "lib" ]]; then
+          rm -rf "$item"
+      fi
+  done
+  cd - > /dev/null
 }
 
 prepare_app_bundle() {

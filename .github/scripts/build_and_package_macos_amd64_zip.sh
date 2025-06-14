@@ -23,6 +23,22 @@ build_flutter_macos() {
   echo "🔨 Building Flutter app for macOS ${ARCH}..."
   flutter pub get
   flutter build macos --release
+
+  # Check if build was successful
+  if [ ! -d "$APP_PATH" ]; then
+      echo "❌ Error: Flutter build failed!"
+      exit 1
+  fi
+
+  # Clean up unnecessary files (added this part)
+  echo "🧹 Cleaning up build directory..."
+  cd build/macos/Build/Products/Release/
+  for item in *; do
+      if [[ "$item" != "gui.app" && "$item" != "lib" ]]; then
+          rm -rf "$item"
+      fi
+  done
+  cd - > /dev/null
 }
 
 download_and_extract_pactus_cli() {
