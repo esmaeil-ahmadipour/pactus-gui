@@ -7,11 +7,11 @@ set -euo pipefail
 # --------------------------------------
 
 TAG_NAME="${1:-local}"  # Use first argument as tag or fallback to 'local'
-OUTPUT_NAME="PactusGUI-${TAG_NAME}-macos-amd64.dmg"
+OUTPUT_NAME="PactusGUI-${TAG_NAME}-macos-arm64.dmg"
 APP_NAME="Pactus GUI"
 APPDIR="temp_dmg"
 APP_PATH="build/macos/Build/Products/Release/gui.app"
-PACTUS_CLI_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_darwin_amd64.tar.gz"
+PACTUS_CLI_URL="https://github.com/pactus-project/pactus/releases/download/v1.7.1/pactus-cli_1.7.1_darwin_arm64.tar.gz"
 
 # --------------------------------------
 # FUNCTIONS
@@ -26,7 +26,7 @@ install_dependencies() {
 }
 
 build_flutter_macos() {
-  echo "🔨 Building Flutter app for macOS AMD64..."
+  echo "🔨 Building Flutter app for macOS ARM64..."
   flutter pub get
   flutter clean
   flutter build macos --release
